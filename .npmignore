@@ -1,0 +1,37 @@
+# Development files
+.git/
+.gitignore
+.npmignore
+.prettierrc
+tsconfig.json
+vite.config.ts
+
+# Source files (since we're publishing the dist)
+src/
+
+# Development dependencies
+node_modules/
+
+# IDE and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# npm pack
+*.tgz
