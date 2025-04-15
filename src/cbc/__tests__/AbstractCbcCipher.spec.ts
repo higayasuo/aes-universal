@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AbstractCbcCipher } from '../AbstractCbcCipher';
-import { CbcEnc } from '../../Enc';
 import { CryptoModule } from 'expo-crypto-universal';
 
 // Mock implementation for testing
@@ -47,8 +46,7 @@ describe('AbstractCbcCipher', () => {
 
   describe('generateIv', () => {
     it('should generate a 16-byte IV', () => {
-      const enc: CbcEnc = 'A128CBC-HS256';
-      const iv = cipher.generateIv(enc);
+      const iv = cipher.generateIv();
       expect(iv).toBeInstanceOf(Uint8Array);
       expect(iv.length).toBe(16);
       expect(mockCryptoModule.getRandomBytes).toHaveBeenCalledWith(16);
