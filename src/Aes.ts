@@ -1,4 +1,4 @@
-import { CryptoModule } from 'expo-crypto-universal';
+import { CryptoModule, isWeb } from 'expo-crypto-universal';
 import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from './Cipher';
 import { isCbcEnc, isGcmEnc } from './Enc';
 import { WebCbcCipher } from './cbc/WebCbcCipher';
@@ -6,9 +6,9 @@ import { ForgeCbcCipher } from './cbc/ForgeCbcCipher';
 import { WebGcmCipher } from './gcm/WebGcmCipher';
 import { ForgeGcmCipher } from './gcm/ForgeGcmCipher';
 
-export const isWeb = () =>
-  typeof window !== 'undefined' &&
-  typeof window.crypto?.getRandomValues === 'function';
+// export const isWeb = () =>
+//   typeof window !== 'undefined' &&
+//   typeof window.crypto?.getRandomValues === 'function';
 
 export class Aes implements Cipher {
   protected cryptoModule: CryptoModule;

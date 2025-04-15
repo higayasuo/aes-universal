@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { Aes, isWeb } from '../Aes';
+import { Aes } from '../Aes';
 import { CryptoModule } from 'expo-crypto-universal';
 import crypto from 'crypto';
+
+// Mock expo-crypto
+vi.mock('expo-crypto', () => ({}));
 
 describe('Aes', () => {
   let mockCryptoModule: CryptoModule;
@@ -26,24 +29,6 @@ describe('Aes', () => {
   afterEach(() => {
     // Restore original window object
     global.window = originalWindow;
-  });
-
-  describe('isWeb', () => {
-    it('should be true when window.crypto.getRandomValues is defined', () => {
-      global.window = {
-        crypto: {
-          getRandomValues: vi.fn(),
-        },
-      } as unknown as Window & typeof globalThis;
-
-      expect(isWeb()).toBe(true);
-    });
-
-    it('should be false when window.crypto.getRandomValues is not defined', () => {
-      global.window = {} as unknown as Window & typeof globalThis;
-
-      expect(isWeb()).toBe(false);
-    });
   });
 
   describe('implementation switching', () => {
