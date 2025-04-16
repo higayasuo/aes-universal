@@ -6,14 +6,19 @@ export default defineConfig({
     lib: {
       entry: 'src/index.ts',
       formats: ['es', 'cjs'],
-      fileName: (format) => `index.${format === 'es' ? 'mjs' : 'js'}`,
+      fileName: (format) => `index.${format === 'es' ? 'mjs' : 'cjs'}`,
     },
     rollupOptions: {
-      external: ['expo-crypto'],
+      external: ['node-forge', 'expo-crypto-universal'],
       output: {
         globals: {},
+        interop: 'auto',
       },
     },
   },
-  plugins: [dts()],
+  plugins: [
+    dts({
+      rollupTypes: true,
+    }),
+  ],
 });
