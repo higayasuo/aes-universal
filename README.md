@@ -18,57 +18,259 @@ A universal AES encryption/decryption library for Expo applications that works o
 npm install expo-aes-universal
 ```
 
-## Usage
+## Peer Dependencies
+
+This package requires the following peer dependencies:
+
+- `expo-crypto-universal`: The base package that defines the crypto interfaces
+- `expo-crypto-universal-web`: Provides Web Crypto API implementation
+- `expo-crypto-universal-native`: Provides native crypto implementation
+- `expo-aes-universal-web`: Web implementation
+- `expo-aes-universal-native`: Native implementation
+
+```bash
+npm install expo-crypto-universal expo-crypto-universal-web expo-crypto-universal-native expo-aes-universal-web expo-aes-universal-native
+```
+
+## AES-128
+
+### CBC Mode (A128CBC-HS256)
+
+In CBC mode, the Content Encryption Key (CEK) includes both the encryption key and the MAC key:
+
+- A128CBC-HS256: 32 bytes (16 bytes for encryption + 16 bytes for MAC)
 
 ```typescript
-import { Aes } from 'expo-aes-universal';
-import { getCryptoModule } from 'expo-crypto-universal';
+import { isWeb } from 'expo-crypto-universal';
+import { WebCryptoModule } from 'expo-crypto-universal-web';
+import { NativeCryptoModule } from 'expo-crypto-universal-native';
+import { WebCbcCipher } from 'expo-aes-universal-web';
+import { NativeCbcCipher } from 'expo-aes-universal-native';
 
-// Get CryptoModule
-const cryptoModule = getCryptoModule();
-const aes = new Aes(cryptoModule);
+// Get the appropriate crypto module for your platform
+const cryptoModule = isWeb() ? new WebCryptoModule() : new NativeCryptoModule();
 
-// Define encryption algorithm
-const enc = 'A128CBC-HS256'; // or 'A192CBC-HS384', 'A256CBC-HS512', 'A128GCM', 'A192GCM', 'A256GCM'
+// Create cipher instance based on platform
+const cipher = isWeb()
+  ? new WebCbcCipher(cryptoModule)
+  : new NativeCbcCipher(cryptoModule);
 
-// Generate random CEK
-const cek = cryptoModule.getRandomBytes(32); // 32 bytes for A128CBC-HS256
+// Define plaintext
+const plaintext = new Uint8Array([1, 2, 3, 4]);
 
-// Define AAD (Additional Authenticated Data)
-const aad = new Uint8Array([4, 5, 6]);
+// Generate random CEK for AES-128-CBC-HS256
+const cek = cryptoModule.getRandomBytes(32); // 32 bytes (16 for encryption + 16 for MAC)
 
 // Encrypt data
-const encrypted = await aes.encrypt({
-  enc,
+const { ciphertext, tag, iv } = await cipher.encrypt({
+  enc: 'A128CBC-HS256', // AES-128 in CBC mode with HMAC-SHA-256
   cek,
-  plaintext: new Uint8Array([1, 2, 3]),
-  aad,
+  plaintext,
 });
 
 // Decrypt data
-const decrypted = await aes.decrypt({
-  enc,
+const decrypted = await cipher.decrypt({
+  enc: 'A128CBC-HS256',
   cek,
-  ciphertext: encrypted.ciphertext,
-  tag: encrypted.tag,
-  iv: encrypted.iv,
-  aad,
+  ciphertext,
+  tag,
+  iv,
 });
+
+expect(decrypted).toEqual(plaintext);
 ```
 
-## Supported Algorithms
+### GCM Mode (A128GCM)
 
-### CBC Mode with HMAC
+In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
 
-- `A128CBC-HS256`: AES-128-CBC with HMAC-SHA-256
-- `A192CBC-HS384`: AES-192-CBC with HMAC-SHA-384
-- `A256CBC-HS512`: AES-256-CBC with HMAC-SHA-512
+- A128GCM: 16 bytes
 
-### GCM Mode
+```typescript
+import { isWeb } from 'expo-crypto-universal';
+import { WebCryptoModule } from 'expo-crypto-universal-web';
+import { NativeCryptoModule } from 'expo-crypto-universal-native';
+import { WebGcmCipher } from 'expo-aes-universal-web';
+import { NativeGcmCipher } from 'expo-aes-universal-native';
 
-- `A128GCM`: AES-128-GCM
-- `A192GCM`: AES-192-GCM
-- `A256GCM`: AES-256-GCM
+// Get the appropriate crypto module for your platform
+const cryptoModule = isWeb() ? new WebCryptoModule() : new NativeCryptoModule();
+
+// Create cipher instance based on platform
+const cipher = isWeb()
+  ? new WebGcmCipher(cryptoModule)
+  : new NativeGcmCipher(cryptoModule);
+
+// Define plaintext
+const plaintext = new Uint8Array([1, 2, 3, 4]);
+
+// Generate random CEK for AES-128-GCM
+const cek = cryptoModule.getRandomBytes(16); // 16 bytes
+
+// Encrypt data
+const { ciphertext, tag, iv } = await cipher.encrypt({
+  enc: 'A128GCM', // AES-128 in GCM mode
+  cek,
+  plaintext,
+  aad: new Uint8Array([5, 6, 7, 8]), // Additional authenticated data
+});
+
+// Decrypt data
+const decrypted = await cipher.decrypt({
+  enc: 'A128GCM',
+  cek,
+  ciphertext,
+  tag,
+  iv,
+  aad: new Uint8Array([5, 6, 7, 8]),
+});
+
+expect(decrypted).toEqual(plaintext);
+```
+
+## AES-192
+
+### CBC Mode (A192CBC-HS384)
+
+In CBC mode, the Content Encryption Key (CEK) includes both the encryption key and the MAC key:
+
+- A192CBC-HS384: 48 bytes (24 bytes for encryption + 24 bytes for MAC)
+
+```typescript
+// Create cipher instance based on platform
+const cipher = isWeb()
+  ? new WebCbcCipher(cryptoModule)
+  : new NativeCbcCipher(cryptoModule);
+
+// Generate random CEK for AES-192-CBC-HS384
+const cek = cryptoModule.getRandomBytes(48); // 48 bytes (24 for encryption + 24 for MAC)
+
+// Encrypt data
+const { ciphertext, tag, iv } = await cipher.encrypt({
+  enc: 'A192CBC-HS384', // AES-192 in CBC mode with HMAC-SHA-384
+  cek,
+  plaintext,
+});
+
+// Decrypt data
+const decrypted = await cipher.decrypt({
+  enc: 'A192CBC-HS384',
+  cek,
+  ciphertext,
+  tag,
+  iv,
+});
+
+expect(decrypted).toEqual(plaintext);
+```
+
+### GCM Mode (A192GCM)
+
+In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
+
+- A192GCM: 24 bytes
+
+```typescript
+// Create cipher instance based on platform
+const cipher = isWeb()
+  ? new WebGcmCipher(cryptoModule)
+  : new NativeGcmCipher(cryptoModule);
+
+// Generate random CEK for AES-192-GCM
+const cek = cryptoModule.getRandomBytes(24); // 24 bytes
+
+// Encrypt data
+const { ciphertext, tag, iv } = await cipher.encrypt({
+  enc: 'A192GCM', // AES-192 in GCM mode
+  cek,
+  plaintext,
+  aad: new Uint8Array([5, 6, 7, 8]), // Additional authenticated data
+});
+
+// Decrypt data
+const decrypted = await cipher.decrypt({
+  enc: 'A192GCM',
+  cek,
+  ciphertext,
+  tag,
+  iv,
+  aad: new Uint8Array([5, 6, 7, 8]),
+});
+
+expect(decrypted).toEqual(plaintext);
+```
+
+## AES-256
+
+### CBC Mode (A256CBC-HS512)
+
+In CBC mode, the Content Encryption Key (CEK) includes both the encryption key and the MAC key:
+
+- A256CBC-HS512: 64 bytes (32 bytes for encryption + 32 bytes for MAC)
+
+```typescript
+// Create cipher instance based on platform
+const cipher = isWeb()
+  ? new WebCbcCipher(cryptoModule)
+  : new NativeCbcCipher(cryptoModule);
+
+// Generate random CEK for AES-256-CBC-HS512
+const cek = cryptoModule.getRandomBytes(64); // 64 bytes (32 for encryption + 32 for MAC)
+
+// Encrypt data
+const { ciphertext, tag, iv } = await cipher.encrypt({
+  enc: 'A256CBC-HS512', // AES-256 in CBC mode with HMAC-SHA-512
+  cek,
+  plaintext,
+});
+
+// Decrypt data
+const decrypted = await cipher.decrypt({
+  enc: 'A256CBC-HS512',
+  cek,
+  ciphertext,
+  tag,
+  iv,
+});
+
+expect(decrypted).toEqual(plaintext);
+```
+
+### GCM Mode (A256GCM)
+
+In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
+
+- A256GCM: 32 bytes
+
+```typescript
+// Create cipher instance based on platform
+const cipher = isWeb()
+  ? new WebGcmCipher(cryptoModule)
+  : new NativeGcmCipher(cryptoModule);
+
+// Generate random CEK for AES-256-GCM
+const cek = cryptoModule.getRandomBytes(32); // 32 bytes
+
+// Encrypt data
+const { ciphertext, tag, iv } = await cipher.encrypt({
+  enc: 'A256GCM', // AES-256 in GCM mode
+  cek,
+  plaintext,
+  aad: new Uint8Array([5, 6, 7, 8]), // Additional authenticated data
+});
+
+// Decrypt data
+const decrypted = await cipher.decrypt({
+  enc: 'A256GCM',
+  cek,
+  ciphertext,
+  tag,
+  iv,
+  aad: new Uint8Array([5, 6, 7, 8]),
+});
+
+expect(decrypted).toEqual(plaintext);
+```
 
 ## Platform Support
 
@@ -76,40 +278,6 @@ const decrypted = await aes.decrypt({
 - Native: Uses forge library
 
 The library automatically selects the appropriate implementation based on the platform.
-
-## Peer Dependencies
-
-This library has the following peer dependencies:
-
-- `node-forge`: Required for native implementation
-- `expo-crypto`: Required by `expo-crypto-universal` for native implementation
-
-You need to install these dependencies in your project:
-
-```bash
-npm install node-forge expo-crypto
-```
-
-Even if you only use the web implementation, these dependencies are required for installation. However, they are only used when running on native platforms.
-
-## Testing
-
-When testing with Vitest, you may encounter the following error:
-
-```
-Error: Expected 'from', got 'typeof'
-```
-
-To resolve this, add the following mock to your test file:
-
-```typescript
-import { vi } from 'vitest';
-
-// Mock expo-crypto
-vi.mock('expo-crypto', () => ({}));
-```
-
-This mock is necessary because `expo-crypto-universal` has `expo-crypto` as a peer dependency.
 
 ## License
 
