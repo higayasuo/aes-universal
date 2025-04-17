@@ -78,6 +78,7 @@ export abstract class AbstractCbcCipher implements Cipher {
 
     const iv = this.generateIv();
     const keyBits = parseKeyBits(enc);
+    this.verifyCekLength(cek, keyBits);
     const { encRawKey, macRawKey } = divideCek({ cek, keyBytes: keyBits >> 3 });
 
     const ciphertext = await this.encryptInternal({
@@ -118,7 +119,12 @@ export abstract class AbstractCbcCipher implements Cipher {
       throw new Error('Invalid encryption algorithm');
     }
 
+    this.verifyIvLength(iv);
+
     const keyBits = parseKeyBits(enc);
+    this.verifyCekLength(cek, keyBits);
+    this.verifyTagLength(tag, keyBits);
+
     const { encRawKey, macRawKey } = divideCek({ cek, keyBytes: keyBits >> 3 });
     const macData = generateMacData({ aad, iv, ciphertext });
     const expectedTag = await this.generateTag({ macRawKey, macData, keyBits });
@@ -134,6 +140,41 @@ export abstract class AbstractCbcCipher implements Cipher {
     });
 
     return plaintext;
+  }
+
+  /**
+   * Verifies the length of the content encryption key (CEK).
+   * @param cek - The content encryption key as a Uint8Array.
+   * @param keyBits - The expected length of the key in bits.
+   * @throws Will throw an error if the length of the CEK is not as expected.
+   */
+  verifyCekLength(cek: Uint8Array, keyBits: number) {
+    if (cek.length !== keyBits >>> 2) {
+      throw new Error('Invalid content encryption key length');
+    }
+  }
+
+  /**
+   * Verifies the length of the authentication tag.
+   * @param tag - The authentication tag as a Uint8Array.
+   * @param keyBits - The expected length of the key in bits.
+   * @throws Will throw an error if the length of the tag is not as expected.
+   */
+  verifyTagLength(tag: Uint8Array, keyBits: number) {
+    if (tag.length !== keyBits >>> 3) {
+      throw new Error('Invalid tag length');
+    }
+  }
+
+  /**
+   * Verifies the length of the initialization vector (IV).
+   * @param iv - The initialization vector as a Uint8Array.
+   * @throws Will throw an error if the length of the IV is not 16 bytes.
+   */
+  verifyIvLength(iv: Uint8Array) {
+    if (iv.length !== 16) {
+      throw new Error('Invalid initialization vector length');
+    }
   }
 
   /**

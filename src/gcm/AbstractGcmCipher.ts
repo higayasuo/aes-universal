@@ -1,6 +1,7 @@
 import { CryptoModule } from 'expo-crypto-universal';
 import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
 import { isGcmEnc } from '../Enc';
+import { parseKeyBits } from '../cbc/parseKeyBits';
 
 /**
  * Arguments required for the internal GCM encryption process.
@@ -85,6 +86,9 @@ export abstract class AbstractGcmCipher implements Cipher {
       throw new Error('Invalid encryption algorithm');
     }
 
+    const keyBits = parseKeyBits(enc);
+    this.verifyCekLength(cek, keyBits);
+
     const iv = this.generateIv();
     const { ciphertext, tag } = await this.encryptInternal({
       encRawKey: cek,
@@ -118,6 +122,12 @@ export abstract class AbstractGcmCipher implements Cipher {
       throw new Error('Invalid encryption algorithm');
     }
 
+    this.verifyTagLength(tag);
+    this.verifyIvLength(iv);
+
+    const keyBits = parseKeyBits(enc);
+    this.verifyCekLength(cek, keyBits);
+
     const plaintext = await this.decryptInternal({
       encRawKey: cek,
       ciphertext,
@@ -127,6 +137,40 @@ export abstract class AbstractGcmCipher implements Cipher {
     });
 
     return plaintext;
+  }
+
+  /**
+   * Verifies the length of the content encryption key (CEK).
+   * @param cek - The content encryption key as a Uint8Array.
+   * @param keyBits - The expected length of the key in bits.
+   * @throws Will throw an error if the length of the CEK is not as expected.
+   */
+  verifyCekLength(cek: Uint8Array, keyBits: number) {
+    if (cek.length !== keyBits >>> 3) {
+      throw new Error('Invalid content encryption key length');
+    }
+  }
+
+  /**
+   * Verifies the length of the authentication tag.
+   * @param tag - The authentication tag as a Uint8Array.
+   * @throws Will throw an error if the length of the tag is not as expected.
+   */
+  verifyTagLength(tag: Uint8Array) {
+    if (tag.length !== 16) {
+      throw new Error('Invalid tag length');
+    }
+  }
+
+  /**
+   * Verifies the length of the initialization vector (IV).
+   * @param iv - The initialization vector as a Uint8Array.
+   * @throws Will throw an error if the length of the IV is not 16 bytes.
+   */
+  verifyIvLength(iv: Uint8Array) {
+    if (iv.length !== 12) {
+      throw new Error('Invalid initialization vector length');
+    }
   }
 
   /**
