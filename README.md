@@ -58,6 +58,9 @@ const cipher = isWeb()
 // Define plaintext
 const plaintext = new Uint8Array([1, 2, 3, 4]);
 
+// Additional authenticated data
+const aad = new Uint8Array([5, 6, 7, 8]);
+
 // Generate random CEK for AES-128-CBC-HS256
 const cek = cryptoModule.getRandomBytes(32); // 32 bytes (16 for encryption + 16 for MAC)
 
@@ -66,6 +69,7 @@ const { ciphertext, tag, iv } = await cipher.encrypt({
   enc: 'A128CBC-HS256', // AES-128 in CBC mode with HMAC-SHA-256
   cek,
   plaintext,
+  aad, // Must use the same AAD for decryption
 });
 
 // Decrypt data
@@ -75,6 +79,7 @@ const decrypted = await cipher.decrypt({
   ciphertext,
   tag,
   iv,
+  aad, // Must use the same AAD as encryption
 });
 
 expect(decrypted).toEqual(plaintext);
@@ -104,6 +109,9 @@ const cipher = isWeb()
 // Define plaintext
 const plaintext = new Uint8Array([1, 2, 3, 4]);
 
+// Additional authenticated data
+const aad = new Uint8Array([5, 6, 7, 8]);
+
 // Generate random CEK for AES-128-GCM
 const cek = cryptoModule.getRandomBytes(16); // 16 bytes
 
@@ -112,7 +120,7 @@ const { ciphertext, tag, iv } = await cipher.encrypt({
   enc: 'A128GCM', // AES-128 in GCM mode
   cek,
   plaintext,
-  aad: new Uint8Array([5, 6, 7, 8]), // Additional authenticated data
+  aad, // Must use the same AAD for decryption
 });
 
 // Decrypt data
@@ -122,7 +130,7 @@ const decrypted = await cipher.decrypt({
   ciphertext,
   tag,
   iv,
-  aad: new Uint8Array([5, 6, 7, 8]),
+  aad, // Must use the same AAD as encryption
 });
 
 expect(decrypted).toEqual(plaintext);
@@ -142,6 +150,12 @@ const cipher = isWeb()
   ? new WebCbcCipher(cryptoModule)
   : new NativeCbcCipher(cryptoModule);
 
+// Define plaintext
+const plaintext = new Uint8Array([1, 2, 3, 4]);
+
+// Additional authenticated data
+const aad = new Uint8Array([5, 6, 7, 8]);
+
 // Generate random CEK for AES-192-CBC-HS384
 const cek = cryptoModule.getRandomBytes(48); // 48 bytes (24 for encryption + 24 for MAC)
 
@@ -150,6 +164,7 @@ const { ciphertext, tag, iv } = await cipher.encrypt({
   enc: 'A192CBC-HS384', // AES-192 in CBC mode with HMAC-SHA-384
   cek,
   plaintext,
+  aad, // Must use the same AAD for decryption
 });
 
 // Decrypt data
@@ -159,6 +174,7 @@ const decrypted = await cipher.decrypt({
   ciphertext,
   tag,
   iv,
+  aad, // Must use the same AAD as encryption
 });
 
 expect(decrypted).toEqual(plaintext);
@@ -176,6 +192,12 @@ const cipher = isWeb()
   ? new WebGcmCipher(cryptoModule)
   : new NativeGcmCipher(cryptoModule);
 
+// Define plaintext
+const plaintext = new Uint8Array([1, 2, 3, 4]);
+
+// Additional authenticated data
+const aad = new Uint8Array([5, 6, 7, 8]);
+
 // Generate random CEK for AES-192-GCM
 const cek = cryptoModule.getRandomBytes(24); // 24 bytes
 
@@ -184,7 +206,7 @@ const { ciphertext, tag, iv } = await cipher.encrypt({
   enc: 'A192GCM', // AES-192 in GCM mode
   cek,
   plaintext,
-  aad: new Uint8Array([5, 6, 7, 8]), // Additional authenticated data
+  aad, // Must use the same AAD for decryption
 });
 
 // Decrypt data
@@ -194,7 +216,7 @@ const decrypted = await cipher.decrypt({
   ciphertext,
   tag,
   iv,
-  aad: new Uint8Array([5, 6, 7, 8]),
+  aad, // Must use the same AAD as encryption
 });
 
 expect(decrypted).toEqual(plaintext);
@@ -214,6 +236,12 @@ const cipher = isWeb()
   ? new WebCbcCipher(cryptoModule)
   : new NativeCbcCipher(cryptoModule);
 
+// Define plaintext
+const plaintext = new Uint8Array([1, 2, 3, 4]);
+
+// Additional authenticated data
+const aad = new Uint8Array([5, 6, 7, 8]);
+
 // Generate random CEK for AES-256-CBC-HS512
 const cek = cryptoModule.getRandomBytes(64); // 64 bytes (32 for encryption + 32 for MAC)
 
@@ -222,6 +250,7 @@ const { ciphertext, tag, iv } = await cipher.encrypt({
   enc: 'A256CBC-HS512', // AES-256 in CBC mode with HMAC-SHA-512
   cek,
   plaintext,
+  aad, // Must use the same AAD for decryption
 });
 
 // Decrypt data
@@ -231,6 +260,7 @@ const decrypted = await cipher.decrypt({
   ciphertext,
   tag,
   iv,
+  aad, // Must use the same AAD as encryption
 });
 
 expect(decrypted).toEqual(plaintext);
@@ -248,6 +278,12 @@ const cipher = isWeb()
   ? new WebGcmCipher(cryptoModule)
   : new NativeGcmCipher(cryptoModule);
 
+// Define plaintext
+const plaintext = new Uint8Array([1, 2, 3, 4]);
+
+// Additional authenticated data
+const aad = new Uint8Array([5, 6, 7, 8]);
+
 // Generate random CEK for AES-256-GCM
 const cek = cryptoModule.getRandomBytes(32); // 32 bytes
 
@@ -256,7 +292,7 @@ const { ciphertext, tag, iv } = await cipher.encrypt({
   enc: 'A256GCM', // AES-256 in GCM mode
   cek,
   plaintext,
-  aad: new Uint8Array([5, 6, 7, 8]), // Additional authenticated data
+  aad, // Must use the same AAD for decryption
 });
 
 // Decrypt data
@@ -266,7 +302,7 @@ const decrypted = await cipher.decrypt({
   ciphertext,
   tag,
   iv,
-  aad: new Uint8Array([5, 6, 7, 8]),
+  aad, // Must use the same AAD as encryption
 });
 
 expect(decrypted).toEqual(plaintext);
