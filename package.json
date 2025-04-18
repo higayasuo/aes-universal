@@ -1,6 +1,6 @@
 {
   "name": "expo-aes-universal",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Universal AES encryption/decryption library for Expo applications that works on both web and native platforms",
   "private": false,
   "type": "module",
@@ -41,6 +41,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/cbor-js": "^0.1.1",
     "@types/node": "^20.11.24",
     "typescript": "^5.2.2",
     "vite": "^5.1.4",
@@ -51,6 +52,7 @@
     "expo-crypto-universal": "^0.2.7"
   },
   "dependencies": {
-    "@higayasuo/u8a-utils": "^1.0.1"
+    "@higayasuo/u8a-utils": "^1.0.1",
+    "cbor-js": "^0.1.0"
   }
 }

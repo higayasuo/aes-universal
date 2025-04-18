@@ -272,6 +272,50 @@ const decrypted = await cipher.decrypt({
 expect(decrypted).toEqual(plaintext);
 ```
 
+## Encryption Data Serialization
+
+The library provides utilities for serializing and deserializing encryption data using CBOR (Concise Binary Object Representation).
+
+```typescript
+import { encodeEncryptionData, decodeEncryptionData } from 'expo-aes-universal';
+
+// After encryption
+const { ciphertext, tag, iv } = await cipher.encrypt({
+  enc: 'A128GCM',
+  cek,
+  plaintext,
+  aad,
+});
+
+// Serialize encryption data
+const serialized = encodeEncryptionData({
+  ciphertext,
+  iv,
+  tag,
+  aad,
+});
+
+// Store serialized data in database or file
+// ...
+
+// Later, deserialize the data
+const deserialized = decodeEncryptionData(serialized);
+
+// Use deserialized data for decryption
+const decrypted = await cipher.decrypt({
+  enc: 'A128GCM',
+  cek,
+  ciphertext: deserialized.ciphertext,
+  tag: deserialized.tag,
+  iv: deserialized.iv,
+  aad: deserialized.aad,
+});
+```
+
+The `encodeEncryptionData` function takes an object containing the encryption components and returns a single `Uint8Array` encoded in CBOR format. The `decodeEncryptionData` function takes the encoded data and returns the original encryption components.
+
+This serialization method is particularly useful when you need to store encrypted data in a database or file, as it combines all the necessary components into a single binary format.
+
 ## Platform Support
 
 - Web: Uses Web Crypto API
