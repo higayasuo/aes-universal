@@ -9,7 +9,7 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'mjs' : 'cjs'}`,
     },
     rollupOptions: {
-      external: ['node-forge', 'expo-crypto-universal'],
+      external: ['expo-crypto-universal'],
       output: {
         globals: {},
         interop: 'auto',
