@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2025-06-02
+
+### Changed
+
+- Improved error messages for cryptographic parameter validation
+  - Added detailed error messages for CBC mode (CEK, IV, and tag length validation)
+  - Added detailed error messages for GCM mode (CEK, IV, and tag length validation)
+  - Updated README with comprehensive error message documentation
+
 ## [0.1.5] - 2025-06-02
 
 ### Changed
