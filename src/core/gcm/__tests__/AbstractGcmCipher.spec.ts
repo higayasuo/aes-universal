@@ -4,7 +4,7 @@ import {
   GcmEncryptInternalArgs,
   GcmDecryptInternalArgs,
 } from '../AbstractGcmCipher';
-import { RandomBytes } from '../../types';
+import { RandomBytes } from '@/common/types';
 
 // Key configurations for testing
 const keyConfigs = [

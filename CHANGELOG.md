@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added detailed error messages for CBC mode (CEK, IV, and tag length validation)
   - Added detailed error messages for GCM mode (CEK, IV, and tag length validation)
   - Updated README with comprehensive error message documentation
+- Reorganized project structure for better maintainability
+  - Moved core cipher interfaces to `src/core`
+  - Moved common utilities to `src/common`
+  - Moved constants to `src/constants`
+  - Added path alias `@` for `src` directory
+  - Updated import paths to use the new path alias
 
 ## [0.1.5] - 2025-06-02
 

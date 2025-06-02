@@ -1,13 +1,13 @@
 import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
-import { generateMacData } from './generateMacData';
-import { isCbcEnc } from '../Enc';
-import { parseKeyBits } from '../parseKeyBits';
-import { divideCek } from './divideCek';
-import { RandomBytes } from '../types';
-import { timingSafeEqual } from './timingSafeEqual';
-import { cbcVerifyCekLength } from './cbcVerifyCekLength';
-import { cbcVerifyTagLength } from './cbcVerifyTagLength';
-import { cbcVerifyIvLength } from './cbcVerifyIvLength';
+import { generateMacData } from './utils/generateMacData';
+import { isCbcEnc } from '@/constants/Enc';
+import { parseKeyBits } from '@/common/utils/parseKeyBits';
+import { divideCek } from './utils/divideCek';
+import { RandomBytes } from '@/common/types';
+import { timingSafeEqual } from './utils/timingSafeEqual';
+import { cbcVerifyCekLength } from './utils/cbcVerifyCekLength';
+import { cbcVerifyTagLength } from './utils/cbcVerifyTagLength';
+import { cbcVerifyIvLength } from './utils/cbcVerifyIvLength';
 
 /**
  * Arguments required for the internal CBC encryption process.

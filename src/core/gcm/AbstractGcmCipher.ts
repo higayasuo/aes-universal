@@ -1,10 +1,10 @@
 import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
-import { isGcmEnc } from '../Enc';
-import { parseKeyBits } from '../parseKeyBits';
-import { RandomBytes } from '../types';
-import { gcmVerifyCekLength } from './gcmVerifyCekLength';
-import { gcmVerifyIvLength } from './gcmVerifyIvLength';
-import { gcmVerifyTagLength } from './gcmVerifyTagLength';
+import { isGcmEnc } from '@/constants/Enc';
+import { parseKeyBits } from '@/common/utils/parseKeyBits';
+import { RandomBytes } from '@/common/types';
+import { gcmVerifyCekLength } from './utils/gcmVerifyCekLength';
+import { gcmVerifyIvLength } from './utils/gcmVerifyIvLength';
+import { gcmVerifyTagLength } from './utils/gcmVerifyTagLength';
 
 /**
  * Arguments required for the internal GCM encryption process.
