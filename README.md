@@ -36,18 +36,19 @@ In CBC mode, the Content Encryption Key (CEK) includes both the encryption key a
 - A128CBC-HS256: 32 bytes (16 bytes for encryption + 16 bytes for MAC)
 
 ```typescript
-import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
 import { WebCbcCipher } from 'aes-universal-web';
 import { NativeCbcCipher } from 'aes-universal-native';
 
-const getRandomBytes = isWeb()
+const isWeb = typeof crypto?.getRandomValues === 'function';
+
+const getRandomBytes = isWeb
   ? webCryptoModule.getRandomBytes
   : nativeCryptoModule.getRandomBytes;
 
 // Create cipher instance based on platform
-const cipher = isWeb()
+const cipher = isWeb
   ? new WebCbcCipher(getRandomBytes)
   : new NativeCbcCipher(getRandomBytes);
 
@@ -88,18 +89,19 @@ In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
 - A128GCM: 16 bytes
 
 ```typescript
-import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
 import { WebGcmCipher } from 'aes-universal-web';
 import { NativeGcmCipher } from 'aes-universal-native';
 
-const getRandomBytes = isWeb()
+const isWeb = typeof crypto?.getRandomValues === 'function';
+
+const getRandomBytes = isWeb
   ? webCryptoModule.getRandomBytes
   : nativeCryptoModule.getRandomBytes;
 
 // Create cipher instance based on platform
-const cipher = isWeb()
+const cipher = isWeb
   ? new WebGcmCipher(getRandomBytes)
   : new NativeGcmCipher(getRandomBytes);
 
@@ -142,18 +144,19 @@ In CBC mode, the Content Encryption Key (CEK) includes both the encryption key a
 - A192CBC-HS384: 48 bytes (24 bytes for encryption + 24 bytes for MAC)
 
 ```typescript
-import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
 import { WebCbcCipher } from 'aes-universal-web';
 import { NativeCbcCipher } from 'aes-universal-native';
 
-const getRandomBytes = isWeb()
+const isWeb = typeof crypto?.getRandomValues === 'function';
+
+const getRandomBytes = isWeb
   ? webCryptoModule.getRandomBytes
   : nativeCryptoModule.getRandomBytes;
 
 // Create cipher instance based on platform
-const cipher = isWeb()
+const cipher = isWeb
   ? new WebCbcCipher(getRandomBytes)
   : new NativeCbcCipher(getRandomBytes);
 
@@ -194,18 +197,19 @@ In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
 - A192GCM: 24 bytes
 
 ```typescript
-import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
 import { WebGcmCipher } from 'aes-universal-web';
 import { NativeGcmCipher } from 'aes-universal-native';
 
-const getRandomBytes = isWeb()
+const isWeb = typeof crypto?.getRandomValues === 'function';
+
+const getRandomBytes = isWeb
   ? webCryptoModule.getRandomBytes
   : nativeCryptoModule.getRandomBytes;
 
 // Create cipher instance based on platform
-const cipher = isWeb()
+const cipher = isWeb
   ? new WebGcmCipher(getRandomBytes)
   : new NativeGcmCipher(getRandomBytes);
 
@@ -248,18 +252,19 @@ In CBC mode, the Content Encryption Key (CEK) includes both the encryption key a
 - A256CBC-HS512: 64 bytes (32 bytes for encryption + 32 bytes for MAC)
 
 ```typescript
-import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
 import { WebCbcCipher } from 'aes-universal-web';
 import { NativeCbcCipher } from 'aes-universal-native';
 
-const getRandomBytes = isWeb()
+const isWeb = typeof crypto?.getRandomValues === 'function';
+
+const getRandomBytes = isWeb
   ? webCryptoModule.getRandomBytes
   : nativeCryptoModule.getRandomBytes;
 
 // Create cipher instance based on platform
-const cipher = isWeb()
+const cipher = isWeb
   ? new WebCbcCipher(getRandomBytes)
   : new NativeCbcCipher(getRandomBytes);
 
@@ -300,18 +305,19 @@ In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
 - A256GCM: 32 bytes
 
 ```typescript
-import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
 import { WebGcmCipher } from 'aes-universal-web';
 import { NativeGcmCipher } from 'aes-universal-native';
 
-const getRandomBytes = isWeb()
+const isWeb = typeof crypto?.getRandomValues === 'function';
+
+const getRandomBytes = isWeb
   ? webCryptoModule.getRandomBytes
   : nativeCryptoModule.getRandomBytes;
 
 // Create cipher instance based on platform
-const cipher = isWeb()
+const cipher = isWeb
   ? new WebGcmCipher(getRandomBytes)
   : new NativeGcmCipher(getRandomBytes);
 
