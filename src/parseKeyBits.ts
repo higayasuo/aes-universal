@@ -1,4 +1,4 @@
-import { Enc } from '../Enc';
+import { Enc } from './Enc';
 
 /**
  * Parses the key bits from the given encryption algorithm string.

@@ -1,10 +1,13 @@
 import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
 import { generateMacData } from './generateMacData';
 import { isCbcEnc } from '../Enc';
-import { parseKeyBits } from './parseKeyBits';
+import { parseKeyBits } from '../parseKeyBits';
 import { divideCek } from './divideCek';
 import { RandomBytes } from '../types';
 import { timingSafeEqual } from './timingSafeEqual';
+import { cbcVerifyCekLength } from './cbcVerifyCekLength';
+import { cbcVerifyTagLength } from './cbcVerifyTagLength';
+import { cbcVerifyIvLength } from './cbcVerifyIvLength';
 
 /**
  * Arguments required for the internal CBC encryption process.
@@ -67,19 +70,19 @@ export abstract class AbstractCbcCipher implements Cipher {
    * @returns A promise that resolves to the encryption result.
    * @throws Will throw an error if the encryption algorithm is invalid.
    */
-  async encrypt({
+  encrypt = async ({
     enc,
     plaintext,
     cek,
     aad,
-  }: EncryptArgs): Promise<EncryptResult> {
+  }: EncryptArgs): Promise<EncryptResult> => {
     if (!isCbcEnc(enc)) {
       throw new Error('Invalid encryption algorithm');
     }
 
     const iv = this.generateIv();
     const keyBits = parseKeyBits(enc);
-    this.verifyCekLength(cek, keyBits);
+    cbcVerifyCekLength(cek, keyBits);
     const { encRawKey, macRawKey } = divideCek({ cek, keyBytes: keyBits >> 3 });
 
     const ciphertext = await this.encryptInternal({
@@ -90,13 +93,13 @@ export abstract class AbstractCbcCipher implements Cipher {
 
     const macData = generateMacData({ aad, iv, ciphertext });
     const tag = await this.generateTag({
-      macRawKey: macRawKey,
+      macRawKey,
       macData,
       keyBits,
     });
 
     return { ciphertext, tag, iv };
-  }
+  };
 
   /**
    * Decrypts the given ciphertext using the specified decryption algorithm.
@@ -108,23 +111,23 @@ export abstract class AbstractCbcCipher implements Cipher {
    * @param aad - Additional authenticated data.
    * @returns A promise that resolves to the decrypted data as a Uint8Array.
    */
-  async decrypt({
+  decrypt = async ({
     enc,
     cek,
     ciphertext,
     iv,
     tag,
     aad,
-  }: DecryptArgs): Promise<Uint8Array> {
+  }: DecryptArgs): Promise<Uint8Array> => {
     if (!isCbcEnc(enc)) {
       throw new Error('Invalid encryption algorithm');
     }
 
-    this.verifyIvLength(iv);
+    cbcVerifyIvLength(iv);
 
     const keyBits = parseKeyBits(enc);
-    this.verifyCekLength(cek, keyBits);
-    this.verifyTagLength(tag, keyBits);
+    cbcVerifyCekLength(cek, keyBits);
+    cbcVerifyTagLength(tag, keyBits);
 
     const { encRawKey, macRawKey } = divideCek({ cek, keyBytes: keyBits >> 3 });
     const macData = generateMacData({ aad, iv, ciphertext });
@@ -141,69 +144,38 @@ export abstract class AbstractCbcCipher implements Cipher {
     });
 
     return plaintext;
-  }
-
-  /**
-   * Verifies the length of the content encryption key (CEK).
-   * @param cek - The content encryption key as a Uint8Array.
-   * @param keyBits - The expected length of the key in bits.
-   * @throws Will throw an error if the length of the CEK is not as expected.
-   */
-  verifyCekLength(cek: Uint8Array, keyBits: number) {
-    if (cek.length !== keyBits >>> 2) {
-      throw new Error('Invalid content encryption key length');
-    }
-  }
-
-  /**
-   * Verifies the length of the authentication tag.
-   * @param tag - The authentication tag as a Uint8Array.
-   * @param keyBits - The expected length of the key in bits.
-   * @throws Will throw an error if the length of the tag is not as expected.
-   */
-  verifyTagLength(tag: Uint8Array, keyBits: number) {
-    if (tag.length !== keyBits >>> 3) {
-      throw new Error('Invalid tag length');
-    }
-  }
-
-  /**
-   * Verifies the length of the initialization vector (IV).
-   * @param iv - The initialization vector as a Uint8Array.
-   * @throws Will throw an error if the length of the IV is not 16 bytes.
-   */
-  verifyIvLength(iv: Uint8Array) {
-    if (iv.length !== 16) {
-      throw new Error('Invalid initialization vector length');
-    }
-  }
+  };
 
   /**
    * Generates an initialization vector (IV) for the given encryption algorithm.
    * @returns A Uint8Array representing the generated IV.
    */
-  generateIv() {
-    return this.randomBytes(16);
-  }
+  generateIv = () => this.randomBytes(16);
 
   /**
    * Abstract method for the internal encryption process.
    * @param args - The arguments required for encryption.
    * @returns A promise that resolves to the encrypted data as a Uint8Array.
    */
-  abstract encryptInternal(args: CbcEncryptInternalArgs): Promise<Uint8Array>;
+  encryptInternal = (_: CbcEncryptInternalArgs): Promise<Uint8Array> => {
+    throw new Error('Not implemented');
+  };
 
   /**
    * Abstract method for the internal decryption process.
    * @param args - The arguments required for decryption.
    * @returns A promise that resolves to the decrypted data as a Uint8Array.
    */
-  abstract decryptInternal(args: CbcDecryptInternalArgs): Promise<Uint8Array>;
+  decryptInternal = (_: CbcDecryptInternalArgs): Promise<Uint8Array> => {
+    throw new Error('Not implemented');
+  };
 
   /**
    * Abstract method for generating a tag.
    * @param args - The arguments required for tag generation.
    * @returns A promise that resolves to the generated tag as a Uint8Array.
    */
-  abstract generateTag(args: GenerateTagArgs): Promise<Uint8Array>;
+  generateTag = (_: GenerateTagArgs): Promise<Uint8Array> => {
+    throw new Error('Not implemented');
+  };
 }

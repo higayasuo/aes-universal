@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseKeyBits } from '../parseKeyBits';
+import { parseKeyBits } from '../../parseKeyBits';
 import { Enc } from '../../Enc';
 
 describe('parseKeyBits', () => {

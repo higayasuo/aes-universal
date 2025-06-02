@@ -23,7 +23,7 @@ export type DecryptArgs = {
 };
 
 export interface Cipher {
-  encrypt(args: EncryptArgs): Promise<EncryptResult>;
+  encrypt: (args: EncryptArgs) => Promise<EncryptResult>;
 
-  decrypt(args: DecryptArgs): Promise<Uint8Array>;
+  decrypt: (args: DecryptArgs) => Promise<Uint8Array>;
 }

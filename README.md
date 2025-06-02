@@ -11,6 +11,7 @@ A universal AES encryption/decryption library that works on both web and native 
 - Native implementation using forge
 - Consistent behavior across platforms
 - TypeScript support
+- Detailed error messages for debugging
 
 ## Installation
 
@@ -26,6 +27,59 @@ This package requires the following peer dependencies:
 - `@higayasuo/u8a-utils`: For Uint8Array utilities
 - `aes-universal-web`: Web implementation
 - `aes-universal-native`: Native implementation
+
+## Error Messages
+
+The library provides detailed error messages to help with debugging:
+
+### CBC Mode
+
+- Content Encryption Key (CEK) length errors:
+
+  ```
+  Invalid CBC content encryption key length: expected {expectedLength} bytes ({keyBits} bits), but got {actualLength} bytes
+  ```
+
+  - A128CBC-HS256: 32 bytes (16 for encryption + 16 for MAC)
+  - A192CBC-HS384: 48 bytes (24 for encryption + 24 for MAC)
+  - A256CBC-HS512: 64 bytes (32 for encryption + 32 for MAC)
+
+- Initialization Vector (IV) length errors:
+
+  ```
+  Invalid CBC IV length: expected 16 bytes, got {actualLength} bytes
+  ```
+
+- Authentication Tag length errors:
+  ```
+  Invalid CBC authentication tag length: expected {expectedLength} bytes ({keyBits} bits), but got {actualLength} bytes
+  ```
+  - A128CBC-HS256: 16 bytes
+  - A192CBC-HS384: 24 bytes
+  - A256CBC-HS512: 32 bytes
+
+### GCM Mode
+
+- Content Encryption Key (CEK) length errors:
+
+  ```
+  Invalid GCM content encryption key length: expected {expectedLength} bytes ({keyBits} bits), but got {actualLength} bytes
+  ```
+
+  - A128GCM: 16 bytes
+  - A192GCM: 24 bytes
+  - A256GCM: 32 bytes
+
+- Initialization Vector (IV) length errors:
+
+  ```
+  Invalid GCM IV length: expected 12 bytes, got {actualLength} bytes
+  ```
+
+- Authentication Tag length errors:
+  ```
+  Invalid GCM authentication tag length: expected 16 bytes, but got {actualLength} bytes
+  ```
 
 ## AES-128
 

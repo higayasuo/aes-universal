@@ -33,19 +33,23 @@ const keyConfigs = [
 
 // Mock implementation for testing
 class MockCbcCipher extends AbstractCbcCipher {
-  async encryptInternal(_args: CbcEncryptInternalArgs): Promise<Uint8Array> {
+  encryptInternal = async (
+    _args: CbcEncryptInternalArgs,
+  ): Promise<Uint8Array> => {
     return new Uint8Array([1, 2, 3]);
-  }
+  };
 
-  async decryptInternal(_args: CbcDecryptInternalArgs): Promise<Uint8Array> {
+  decryptInternal = async (
+    _args: CbcDecryptInternalArgs,
+  ): Promise<Uint8Array> => {
     return new Uint8Array([4, 5, 6]);
-  }
+  };
 
-  async generateTag(args: GenerateTagArgs): Promise<Uint8Array> {
+  generateTag = async (args: GenerateTagArgs): Promise<Uint8Array> => {
     // Return a tag with length based on keyBits
     const tagLength = args.keyBits >>> 3;
     return new Uint8Array(tagLength).fill(0x42);
-  }
+  };
 }
 
 describe('AbstractCbcCipher', () => {
@@ -56,26 +60,6 @@ describe('AbstractCbcCipher', () => {
       .fn()
       .mockImplementation((size) => new Uint8Array(size).fill(0x42));
     cipher = new MockCbcCipher(randomBytes);
-  });
-
-  describe('verifyCekLength', () => {
-    it.each(keyConfigs)(
-      'should not throw for valid CEK length with $enc',
-      ({ keyBits, cekLength }) => {
-        const cek = new Uint8Array(cekLength);
-        expect(() => cipher.verifyCekLength(cek, keyBits)).not.toThrow();
-      },
-    );
-
-    it.each(keyConfigs)(
-      'should throw for invalid CEK length with $enc',
-      ({ keyBits, cekLength }) => {
-        const cek = new Uint8Array(cekLength - 1);
-        expect(() => cipher.verifyCekLength(cek, keyBits)).toThrow(
-          'Invalid content encryption key length',
-        );
-      },
-    );
   });
 
   describe('encrypt', () => {
@@ -114,43 +98,9 @@ describe('AbstractCbcCipher', () => {
             plaintext,
             aad,
           }),
-        ).rejects.toThrow('Invalid content encryption key length');
+        ).rejects.toThrow('Invalid CBC content encryption key length');
       },
     );
-  });
-
-  describe('verifyTagLength', () => {
-    it.each(keyConfigs)(
-      'should not throw for valid tag length with $enc',
-      ({ keyBits, validTagLength }) => {
-        const tag = new Uint8Array(validTagLength);
-        expect(() => cipher.verifyTagLength(tag, keyBits)).not.toThrow();
-      },
-    );
-
-    it.each(keyConfigs)(
-      'should throw for invalid tag length with $enc',
-      ({ keyBits, invalidTagLength }) => {
-        const tag = new Uint8Array(invalidTagLength);
-        expect(() => cipher.verifyTagLength(tag, keyBits)).toThrow(
-          'Invalid tag length',
-        );
-      },
-    );
-  });
-
-  describe('verifyIvLength', () => {
-    it('should not throw for valid IV length', () => {
-      const iv = new Uint8Array(16);
-      expect(() => cipher.verifyIvLength(iv)).not.toThrow();
-    });
-
-    it('should throw for invalid IV length', () => {
-      const iv = new Uint8Array(15);
-      expect(() => cipher.verifyIvLength(iv)).toThrow(
-        'Invalid initialization vector length',
-      );
-    });
   });
 
   describe('decrypt', () => {
@@ -195,7 +145,7 @@ describe('AbstractCbcCipher', () => {
             tag,
             aad,
           }),
-        ).rejects.toThrow('Invalid content encryption key length');
+        ).rejects.toThrow('Invalid CBC content encryption key length');
       },
     );
 
@@ -216,7 +166,7 @@ describe('AbstractCbcCipher', () => {
           tag,
           aad,
         }),
-      ).rejects.toThrow('Invalid initialization vector length');
+      ).rejects.toThrow('Invalid CBC IV length');
     });
 
     it.each(keyConfigs)(
@@ -237,7 +187,7 @@ describe('AbstractCbcCipher', () => {
             tag,
             aad,
           }),
-        ).rejects.toThrow('Invalid tag length');
+        ).rejects.toThrow('Invalid CBC authentication tag length');
       },
     );
   });
@@ -263,34 +213,6 @@ describe('AbstractCbcCipher', () => {
       expect(iv.length).toBe(16);
       expect(randomBytes).toHaveBeenCalledWith(16);
       expect(iv.every((byte) => byte === 0x42)).toBe(true);
-    });
-  });
-
-  describe('generateTag', () => {
-    it('should generate a tag with length based on keyBits', async () => {
-      const args: GenerateTagArgs = {
-        keyBits: 256,
-        macRawKey: new Uint8Array(32),
-        macData: new Uint8Array([1, 2, 3]),
-      };
-
-      const tag = await cipher.generateTag(args);
-      expect(tag).toBeInstanceOf(Uint8Array);
-      expect(tag.length).toBe(32); // 256 >>> 3 = 32
-      expect(tag.every((byte) => byte === 0x42)).toBe(true);
-    });
-
-    it('should generate a tag with length based on keyBits for 128-bit key', async () => {
-      const args: GenerateTagArgs = {
-        keyBits: 128,
-        macRawKey: new Uint8Array(16),
-        macData: new Uint8Array([1, 2, 3]),
-      };
-
-      const tag = await cipher.generateTag(args);
-      expect(tag).toBeInstanceOf(Uint8Array);
-      expect(tag.length).toBe(16); // 128 >>> 3 = 16
-      expect(tag.every((byte) => byte === 0x42)).toBe(true);
     });
   });
 });
