@@ -9,7 +9,7 @@ export default defineConfig({
       fileName: (format) => `index.${format === 'es' ? 'mjs' : 'cjs'}`,
     },
     rollupOptions: {
-      external: ['expo-crypto-universal'],
+      external: [/^@noble\/hashes($|\/)/, '@higayasuo/u8a-utils'],
       output: {
         globals: {},
         interop: 'auto',

@@ -1,7 +1,7 @@
-import { CryptoModule } from 'expo-crypto-universal';
 import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
 import { isGcmEnc } from '../Enc';
 import { parseKeyBits } from '../cbc/parseKeyBits';
+import { RandomBytes } from '../types';
 
 /**
  * Arguments required for the internal GCM encryption process.
@@ -28,10 +28,18 @@ export type GcmEncryptInternalArgs = {
   aad: Uint8Array;
 };
 
+/**
+ * Result of the internal GCM encryption process.
+ */
 export type GcmEncryptInternalResult = {
-  /** The ciphertext data to be encrypted as a Uint8Array. */
+  /**
+   * The encrypted data as a Uint8Array.
+   */
   ciphertext: Uint8Array;
-  /** The authentication tag as a Uint8Array. */
+
+  /**
+   * The authentication tag as a Uint8Array.
+   */
   tag: Uint8Array;
 };
 
@@ -39,15 +47,29 @@ export type GcmEncryptInternalResult = {
  * Arguments required for the internal GCM decryption process.
  */
 export type GcmDecryptInternalArgs = {
-  /** The raw encryption key as a Uint8Array. */
+  /**
+   * The raw encryption key as a Uint8Array.
+   */
   encRawKey: Uint8Array;
-  /** The initialization vector as a Uint8Array. */
-  iv: Uint8Array;
-  /** The ciphertext data to be decrypted as a Uint8Array. */
+
+  /**
+   * The ciphertext data to be decrypted as a Uint8Array.
+   */
   ciphertext: Uint8Array;
-  /** The authentication tag as a Uint8Array. */
+
+  /**
+   * The authentication tag as a Uint8Array.
+   */
   tag: Uint8Array;
-  /** Additional authenticated data as a Uint8Array. */
+
+  /**
+   * The initialization vector as a Uint8Array.
+   */
+  iv: Uint8Array;
+
+  /**
+   * Additional authenticated data as a Uint8Array.
+   */
   aad: Uint8Array;
 };
 
@@ -56,15 +78,15 @@ export type GcmDecryptInternalArgs = {
  * Implements the Cipher interface.
  */
 export abstract class AbstractGcmCipher implements Cipher {
-  /** The crypto module used for cryptographic operations. */
-  protected cryptoModule: CryptoModule;
+  /** The function used to generate random bytes. */
+  protected randomBytes: RandomBytes;
 
   /**
-   * Constructs an AbstractCbcCipher instance.
-   * @param cryptoModule - The crypto module to be used.
+   * Constructs an AbstractGcmCipher instance.
+   * @param randomBytes - The function used to generate random bytes.
    */
-  constructor(cryptoModule: CryptoModule) {
-    this.cryptoModule = cryptoModule;
+  constructor(randomBytes: RandomBytes) {
+    this.randomBytes = randomBytes;
   }
 
   /**
@@ -154,7 +176,7 @@ export abstract class AbstractGcmCipher implements Cipher {
   /**
    * Verifies the length of the authentication tag.
    * @param tag - The authentication tag as a Uint8Array.
-   * @throws Will throw an error if the length of the tag is not as expected.
+   * @throws Will throw an error if the length of the tag is not 16 bytes.
    */
   verifyTagLength(tag: Uint8Array) {
     if (tag.length !== 16) {
@@ -165,7 +187,7 @@ export abstract class AbstractGcmCipher implements Cipher {
   /**
    * Verifies the length of the initialization vector (IV).
    * @param iv - The initialization vector as a Uint8Array.
-   * @throws Will throw an error if the length of the IV is not 16 bytes.
+   * @throws Will throw an error if the length of the IV is not 12 bytes.
    */
   verifyIvLength(iv: Uint8Array) {
     if (iv.length !== 12) {
@@ -175,11 +197,10 @@ export abstract class AbstractGcmCipher implements Cipher {
 
   /**
    * Generates an initialization vector (IV) for the given encryption algorithm.
-   * @param _enc - The encryption algorithm.
    * @returns A Uint8Array representing the generated IV.
    */
   generateIv() {
-    return this.cryptoModule.getRandomBytes(12);
+    return this.randomBytes(12);
   }
 
   /**

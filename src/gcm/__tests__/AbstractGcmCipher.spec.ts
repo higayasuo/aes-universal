@@ -4,7 +4,7 @@ import {
   GcmEncryptInternalArgs,
   GcmDecryptInternalArgs,
 } from '../AbstractGcmCipher';
-import { CryptoModule } from 'expo-crypto-universal';
+import { RandomBytes } from '../../types';
 
 // Key configurations for testing
 const keyConfigs = [
@@ -43,16 +43,14 @@ class MockGcmCipher extends AbstractGcmCipher {
 }
 
 describe('AbstractGcmCipher', () => {
-  let mockCryptoModule: CryptoModule;
+  let randomBytes: RandomBytes;
   let cipher: MockGcmCipher;
 
   beforeEach(() => {
-    mockCryptoModule = {
-      getRandomBytes: vi
-        .fn()
-        .mockImplementation((size) => new Uint8Array(size).fill(0x42)),
-    } as unknown as CryptoModule;
-    cipher = new MockGcmCipher(mockCryptoModule);
+    randomBytes = vi
+      .fn()
+      .mockImplementation((size) => new Uint8Array(size).fill(0x42));
+    cipher = new MockGcmCipher(randomBytes);
   });
 
   describe('verifyCekLength', () => {
@@ -234,7 +232,7 @@ describe('AbstractGcmCipher', () => {
       const iv = cipher.generateIv();
       expect(iv).toBeInstanceOf(Uint8Array);
       expect(iv.length).toBe(12);
-      expect(mockCryptoModule.getRandomBytes).toHaveBeenCalledWith(12);
+      expect(randomBytes).toHaveBeenCalledWith(12);
       expect(iv.every((byte) => byte === 0x42)).toBe(true);
     });
   });

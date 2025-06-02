@@ -1,9 +1,10 @@
-import { CryptoModule } from 'expo-crypto-universal';
 import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
 import { generateMacData } from './generateMacData';
 import { isCbcEnc } from '../Enc';
 import { parseKeyBits } from './parseKeyBits';
 import { divideCek } from './divideCek';
+import { RandomBytes } from '../types';
+import { timingSafeEqual } from './timingSafeEqual';
 
 /**
  * Arguments required for the internal CBC encryption process.
@@ -46,15 +47,15 @@ export type GenerateTagArgs = {
  * Implements the Cipher interface.
  */
 export abstract class AbstractCbcCipher implements Cipher {
-  /** The crypto module used for cryptographic operations. */
-  protected cryptoModule: CryptoModule;
+  /** The function used to generate random bytes. */
+  protected randomBytes: RandomBytes;
 
   /**
    * Constructs an AbstractCbcCipher instance.
-   * @param cryptoModule - The crypto module to be used.
+   * @param randomBytes - The function used to generate random bytes.
    */
-  constructor(cryptoModule: CryptoModule) {
-    this.cryptoModule = cryptoModule;
+  constructor(randomBytes: RandomBytes) {
+    this.randomBytes = randomBytes;
   }
 
   /**
@@ -129,7 +130,7 @@ export abstract class AbstractCbcCipher implements Cipher {
     const macData = generateMacData({ aad, iv, ciphertext });
     const expectedTag = await this.generateTag({ macRawKey, macData, keyBits });
 
-    if (!(await this.timingSafeEqual(expectedTag, tag))) {
+    if (!timingSafeEqual(expectedTag, tag)) {
       throw new Error('Invalid authentication tag');
     }
 
@@ -182,26 +183,7 @@ export abstract class AbstractCbcCipher implements Cipher {
    * @returns A Uint8Array representing the generated IV.
    */
   generateIv() {
-    return this.cryptoModule.getRandomBytes(16);
-  }
-
-  /**
-   * Compares two Uint8Array values in a timing-safe manner.
-   * @param a - The first Uint8Array to compare.
-   * @param b - The second Uint8Array to compare.
-   * @returns A promise that resolves to true if the values are equal, false otherwise.
-   */
-  async timingSafeEqual(a: Uint8Array, b: Uint8Array): Promise<boolean> {
-    const aDigest = await this.cryptoModule.sha256Async(a);
-    const bDigest = await this.cryptoModule.sha256Async(b);
-
-    let out = 0;
-    let i = -1;
-    while (++i < 32) {
-      out |= aDigest[i] ^ bDigest[i];
-    }
-
-    return out === 0;
+    return this.randomBytes(16);
   }
 
   /**
