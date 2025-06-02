@@ -38,6 +38,14 @@
   ],
   "author": "Yasuo Higa",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/higayasuo/aes-universal.git"
+  },
+  "bugs": {
+    "url": "https://github.com/higayasuo/aes-universal/issues"
+  },
+  "homepage": "https://github.com/higayasuo/aes-universal#readme",
   "devDependencies": {
     "@types/cbor-js": "^0.1.1",
     "@types/node": "^20.11.24",
