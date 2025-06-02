@@ -1,4 +1,4 @@
-# expo-aes-universal
+# aes-universal
 
 A universal AES encryption/decryption library that works on both web and native platforms.
 
@@ -15,7 +15,7 @@ A universal AES encryption/decryption library that works on both web and native 
 ## Installation
 
 ```bash
-npm install expo-aes-universal
+npm install aes-universal
 ```
 
 ## Peer Dependencies
@@ -24,8 +24,8 @@ This package requires the following peer dependencies:
 
 - `@noble/hashes`: For cryptographic hash functions
 - `@higayasuo/u8a-utils`: For Uint8Array utilities
-- `expo-aes-universal-web`: Web implementation
-- `expo-aes-universal-native`: Native implementation
+- `aes-universal-web`: Web implementation
+- `aes-universal-native`: Native implementation
 
 ## AES-128
 
@@ -39,8 +39,8 @@ In CBC mode, the Content Encryption Key (CEK) includes both the encryption key a
 import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebCbcCipher } from 'expo-aes-universal-web';
-import { NativeCbcCipher } from 'expo-aes-universal-native';
+import { WebCbcCipher } from 'aes-universal-web';
+import { NativeCbcCipher } from 'aes-universal-native';
 
 const getRandomBytes = isWeb()
   ? webCryptoModule.getRandomBytes
@@ -91,8 +91,8 @@ In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
 import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebGcmCipher } from 'expo-aes-universal-web';
-import { NativeGcmCipher } from 'expo-aes-universal-native';
+import { WebGcmCipher } from 'aes-universal-web';
+import { NativeGcmCipher } from 'aes-universal-native';
 
 const getRandomBytes = isWeb()
   ? webCryptoModule.getRandomBytes
@@ -145,8 +145,8 @@ In CBC mode, the Content Encryption Key (CEK) includes both the encryption key a
 import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebCbcCipher } from 'expo-aes-universal-web';
-import { NativeCbcCipher } from 'expo-aes-universal-native';
+import { WebCbcCipher } from 'aes-universal-web';
+import { NativeCbcCipher } from 'aes-universal-native';
 
 const getRandomBytes = isWeb()
   ? webCryptoModule.getRandomBytes
@@ -197,8 +197,8 @@ In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
 import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebGcmCipher } from 'expo-aes-universal-web';
-import { NativeGcmCipher } from 'expo-aes-universal-native';
+import { WebGcmCipher } from 'aes-universal-web';
+import { NativeGcmCipher } from 'aes-universal-native';
 
 const getRandomBytes = isWeb()
   ? webCryptoModule.getRandomBytes
@@ -251,8 +251,8 @@ In CBC mode, the Content Encryption Key (CEK) includes both the encryption key a
 import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebCbcCipher } from 'expo-aes-universal-web';
-import { NativeCbcCipher } from 'expo-aes-universal-native';
+import { WebCbcCipher } from 'aes-universal-web';
+import { NativeCbcCipher } from 'aes-universal-native';
 
 const getRandomBytes = isWeb()
   ? webCryptoModule.getRandomBytes
@@ -303,8 +303,8 @@ In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
 import { isWeb } from 'expo-crypto-universal';
 import { webCryptoModule } from 'expo-crypto-universal-web';
 import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebGcmCipher } from 'expo-aes-universal-web';
-import { NativeGcmCipher } from 'expo-aes-universal-native';
+import { WebGcmCipher } from 'aes-universal-web';
+import { NativeGcmCipher } from 'aes-universal-native';
 
 const getRandomBytes = isWeb()
   ? webCryptoModule.getRandomBytes
@@ -350,7 +350,7 @@ expect(decrypted).toEqual(plaintext);
 The library provides utilities for serializing and deserializing encryption data using CBOR (Concise Binary Object Representation).
 
 ```typescript
-import { encodeEncryptionData, decodeEncryptionData } from 'expo-aes-universal';
+import { encodeEncryptionData, decodeEncryptionData } from 'aes-universal';
 
 // After encryption
 const { ciphertext, tag, iv } = await cipher.encrypt({

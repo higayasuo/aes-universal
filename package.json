@@ -1,7 +1,7 @@
 {
-  "name": "expo-aes-universal",
-  "version": "0.1.2",
-  "description": "Universal AES encryption/decryption library for Expo applications that works on both web and native platforms",
+  "name": "aes-universal",
+  "version": "0.1.0",
+  "description": "Universal AES encryption/decryption library that works on both web and native platforms",
   "private": false,
   "type": "module",
   "main": "./dist/index.cjs",
@@ -20,13 +20,11 @@
     "LICENSE"
   ],
   "scripts": {
-    "dev": "vite",
-    "build": "rm -rf dist && tsc && vite build",
-    "preview": "vite preview",
+    "build": "npm run typecheck && vite build",
     "test": "vitest --run",
     "coverage": "vitest run --coverage",
-    "prepublishOnly": "npm run build",
-    "pack-local": "npm run build && npm pack"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm test && npm run build"
   },
   "keywords": [
     "expo",
@@ -38,7 +36,7 @@
     "aes",
     "hmac"
   ],
-  "author": "",
+  "author": "Yasuo Higa",
   "license": "MIT",
   "devDependencies": {
     "@types/cbor-js": "^0.1.1",
