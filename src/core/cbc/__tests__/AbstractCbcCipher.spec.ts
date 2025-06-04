@@ -10,21 +10,21 @@ import {
 const keyConfigs = [
   {
     enc: 'A128CBC-HS256',
-    keyBits: 128,
+    keyBitLength: 128,
     cekLength: 32,
     validTagLength: 16,
     invalidTagLength: 15,
   },
   {
     enc: 'A192CBC-HS384',
-    keyBits: 192,
+    keyBitLength: 192,
     cekLength: 48,
     validTagLength: 24,
     invalidTagLength: 23,
   },
   {
     enc: 'A256CBC-HS512',
-    keyBits: 256,
+    keyBitLength: 256,
     cekLength: 64,
     validTagLength: 32,
     invalidTagLength: 31,
@@ -46,8 +46,8 @@ class MockCbcCipher extends AbstractCbcCipher {
   };
 
   generateTag = async (args: GenerateTagArgs): Promise<Uint8Array> => {
-    // Return a tag with length based on keyBits
-    const tagLength = args.keyBits >>> 3;
+    // Return a tag with length based on keyBitLength
+    const tagLength = args.keyBitLength >>> 3;
     return new Uint8Array(tagLength).fill(0x42);
   };
 }

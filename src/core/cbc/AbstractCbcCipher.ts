@@ -1,7 +1,7 @@
 import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
 import { generateMacData } from './utils/generateMacData';
 import { isCbcEnc } from '@/constants/Enc';
-import { parseKeyBits } from '@/common/utils/parseKeyBits';
+import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
 import { divideCek } from './utils/divideCek';
 import { RandomBytes } from '@/common/types';
 import { timingSafeEqual } from './utils/timingSafeEqual';
@@ -41,8 +41,8 @@ export type GenerateTagArgs = {
   macRawKey: Uint8Array;
   /** The MAC data as a Uint8Array. */
   macData: Uint8Array;
-  /** The number of key bits. */
-  keyBits: number;
+  /** The length of the key in bits. */
+  keyBitLength: number;
 };
 
 /**
@@ -81,9 +81,12 @@ export abstract class AbstractCbcCipher implements Cipher {
     }
 
     const iv = this.generateIv();
-    const keyBits = parseKeyBits(enc);
-    cbcVerifyCekLength(cek, keyBits);
-    const { encRawKey, macRawKey } = divideCek({ cek, keyBytes: keyBits >> 3 });
+    const keyBitLength = parseKeyBitLength(enc);
+    cbcVerifyCekLength(cek, keyBitLength);
+    const { encRawKey, macRawKey } = divideCek({
+      cek,
+      keyBitLength,
+    });
 
     const ciphertext = await this.encryptInternal({
       iv,
@@ -95,7 +98,7 @@ export abstract class AbstractCbcCipher implements Cipher {
     const tag = await this.generateTag({
       macRawKey,
       macData,
-      keyBits,
+      keyBitLength,
     });
 
     return { ciphertext, tag, iv };
@@ -125,13 +128,20 @@ export abstract class AbstractCbcCipher implements Cipher {
 
     cbcVerifyIvLength(iv);
 
-    const keyBits = parseKeyBits(enc);
-    cbcVerifyCekLength(cek, keyBits);
-    cbcVerifyTagLength(tag, keyBits);
+    const keyBitLength = parseKeyBitLength(enc);
+    cbcVerifyCekLength(cek, keyBitLength);
+    cbcVerifyTagLength(tag, keyBitLength);
 
-    const { encRawKey, macRawKey } = divideCek({ cek, keyBytes: keyBits >> 3 });
+    const { encRawKey, macRawKey } = divideCek({
+      cek,
+      keyBitLength,
+    });
     const macData = generateMacData({ aad, iv, ciphertext });
-    const expectedTag = await this.generateTag({ macRawKey, macData, keyBits });
+    const expectedTag = await this.generateTag({
+      macRawKey,
+      macData,
+      keyBitLength,
+    });
 
     if (!timingSafeEqual(expectedTag, tag)) {
       throw new Error('Invalid authentication tag');

@@ -10,19 +10,19 @@ import { RandomBytes } from '@/common/types';
 const keyConfigs = [
   {
     enc: 'A128GCM',
-    keyBits: 128,
+    keyBitLength: 128,
     cekLength: 16,
     invalidCekLength: 15,
   },
   {
     enc: 'A192GCM',
-    keyBits: 192,
+    keyBitLength: 192,
     cekLength: 24,
     invalidCekLength: 23,
   },
   {
     enc: 'A256GCM',
-    keyBits: 256,
+    keyBitLength: 256,
     cekLength: 32,
     invalidCekLength: 31,
   },

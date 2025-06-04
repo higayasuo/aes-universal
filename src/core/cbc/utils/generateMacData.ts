@@ -23,7 +23,7 @@ export const generateMacData = ({
   iv,
   ciphertext,
 }: GenerateMacDataArgs): Uint8Array => {
-  const aadBits = uint64BE(aad.length << 3);
+  const aadBitLength = uint64BE(aad.length << 3);
 
-  return concatUint8Arrays(aad, iv, ciphertext, aadBits);
+  return concatUint8Arrays(aad, iv, ciphertext, aadBitLength);
 };

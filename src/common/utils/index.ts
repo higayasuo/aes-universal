@@ -1,2 +1,2 @@
 export * from './encryptionData';
-export * from './parseKeyBits';
+export * from './parseKeyBitLength';

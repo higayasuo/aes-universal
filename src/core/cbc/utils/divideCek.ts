@@ -1,3 +1,5 @@
+import { cbcVerifyCekLength } from './cbcVerifyCekLength';
+
 /**
  * Arguments for the divideCek function.
  */
@@ -8,9 +10,11 @@ type DivideCekArgs = {
   cek: Uint8Array;
 
   /**
-   * The number of key bytes.
+   * The length of the key in bits.
+   * This value is used to determine how to split the content encryption key (CEK)
+   * into encryption and MAC raw keys.
    */
-  keyBytes: number;
+  keyBitLength: number;
 };
 
 /**
@@ -37,14 +41,13 @@ type DivideCekResult = {
  */
 export const divideCek = ({
   cek,
-  keyBytes,
+  keyBitLength,
 }: DivideCekArgs): DivideCekResult => {
-  if (cek.length !== keyBytes * 2) {
-    throw new Error('CEK length must be twice the keyBytes');
-  }
+  cbcVerifyCekLength(cek, keyBitLength);
+  const keyByteLength = keyBitLength >>> 3;
 
-  const encRawKey = cek.slice(keyBytes);
-  const macRawKey = cek.slice(0, keyBytes);
+  const encRawKey = cek.slice(keyByteLength);
+  const macRawKey = cek.slice(0, keyByteLength);
 
   return { encRawKey, macRawKey };
 };

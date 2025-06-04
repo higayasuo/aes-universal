@@ -1,6 +1,6 @@
 import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
 import { isGcmEnc } from '@/constants/Enc';
-import { parseKeyBits } from '@/common/utils/parseKeyBits';
+import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
 import { RandomBytes } from '@/common/types';
 import { gcmVerifyCekLength } from './utils/gcmVerifyCekLength';
 import { gcmVerifyIvLength } from './utils/gcmVerifyIvLength';
@@ -111,8 +111,8 @@ export abstract class AbstractGcmCipher implements Cipher {
       throw new Error('Invalid encryption algorithm');
     }
 
-    const keyBits = parseKeyBits(enc);
-    gcmVerifyCekLength(cek, keyBits);
+    const keyBitLength = parseKeyBitLength(enc);
+    gcmVerifyCekLength(cek, keyBitLength);
 
     const iv = this.generateIv();
     const { ciphertext, tag } = await this.encryptInternal({
@@ -150,8 +150,8 @@ export abstract class AbstractGcmCipher implements Cipher {
     gcmVerifyTagLength(tag);
     gcmVerifyIvLength(iv);
 
-    const keyBits = parseKeyBits(enc);
-    gcmVerifyCekLength(cek, keyBits);
+    const keyBitLength = parseKeyBitLength(enc);
+    gcmVerifyCekLength(cek, keyBitLength);
 
     const plaintext = await this.decryptInternal({
       encRawKey: cek,
