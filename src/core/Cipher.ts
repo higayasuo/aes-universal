@@ -1,13 +1,13 @@
 import { Enc } from '@/constants/Enc';
 
 /**
- * Arguments required for encryption operation.
+ * Parameters required for encryption operation.
  * @property {Enc} enc - The encryption algorithm to use.
  * @property {Uint8Array} plaintext - The data to be encrypted.
  * @property {Uint8Array} cek - The content encryption key.
  * @property {Uint8Array} aad - Additional authenticated data.
  */
-export type EncryptArgs = {
+export type EncryptParams = {
   enc: Enc;
   plaintext: Uint8Array;
   cek: Uint8Array;
@@ -27,7 +27,7 @@ export type EncryptResult = {
 };
 
 /**
- * Arguments required for decryption operation.
+ * Parameters required for decryption operation.
  * @property {string} enc - The encryption algorithm used.
  * @property {Uint8Array} cek - The content encryption key.
  * @property {Uint8Array} ciphertext - The data to be decrypted.
@@ -35,7 +35,7 @@ export type EncryptResult = {
  * @property {Uint8Array} tag - The authentication tag.
  * @property {Uint8Array} aad - Additional authenticated data.
  */
-export type DecryptArgs = {
+export type DecryptParams = {
   enc: string;
   cek: Uint8Array;
   ciphertext: Uint8Array;
@@ -50,15 +50,15 @@ export type DecryptArgs = {
 export interface Cipher {
   /**
    * Encrypts data using the specified algorithm and parameters.
-   * @param {EncryptArgs} args - The encryption arguments.
+   * @param {EncryptParams} args - The encryption parameters.
    * @returns {Promise<EncryptResult>} A promise that resolves to the encryption result.
    */
-  encrypt: (args: EncryptArgs) => Promise<EncryptResult>;
+  encrypt: (params: EncryptParams) => Promise<EncryptResult>;
 
   /**
    * Decrypts data using the specified algorithm and parameters.
-   * @param {DecryptArgs} args - The decryption arguments.
+   * @param {DecryptParams} args - The decryption parameters.
    * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted data.
    */
-  decrypt: (args: DecryptArgs) => Promise<Uint8Array>;
+  decrypt: (params: DecryptParams) => Promise<Uint8Array>;
 }

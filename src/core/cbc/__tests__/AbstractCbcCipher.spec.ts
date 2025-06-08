@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   AbstractCbcCipher,
-  CbcEncryptInternalArgs,
-  CbcDecryptInternalArgs,
-  GenerateTagArgs,
+  CbcEncryptInternalParams,
+  CbcDecryptInternalParams,
+  GenerateTagParams,
 } from '../AbstractCbcCipher';
 
 // Key configurations for testing
@@ -34,18 +34,18 @@ const keyConfigs = [
 // Mock implementation for testing
 class MockCbcCipher extends AbstractCbcCipher {
   encryptInternal = async (
-    _args: CbcEncryptInternalArgs,
+    _args: CbcEncryptInternalParams,
   ): Promise<Uint8Array> => {
     return new Uint8Array([1, 2, 3]);
   };
 
   decryptInternal = async (
-    _args: CbcDecryptInternalArgs,
+    _args: CbcDecryptInternalParams,
   ): Promise<Uint8Array> => {
     return new Uint8Array([4, 5, 6]);
   };
 
-  generateTag = async (args: GenerateTagArgs): Promise<Uint8Array> => {
+  generateTag = async (args: GenerateTagParams): Promise<Uint8Array> => {
     // Return a tag with length based on keyBitLength
     const tagLength = args.keyBitLength >>> 3;
     return new Uint8Array(tagLength).fill(0x42);

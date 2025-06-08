@@ -1,4 +1,4 @@
-import { uint64BE, concatUint8Arrays } from '@higayasuo/u8a-utils';
+import { toUint64BE, concatUint8Arrays } from 'u8a-utils';
 
 /**
  * Arguments for generating MAC data.
@@ -23,7 +23,7 @@ export const generateMacData = ({
   iv,
   ciphertext,
 }: GenerateMacDataArgs): Uint8Array => {
-  const aadBitLength = uint64BE(aad.length << 3);
+  const aadBitLength = toUint64BE(aad.length << 3);
 
   return concatUint8Arrays(aad, iv, ciphertext, aadBitLength);
 };

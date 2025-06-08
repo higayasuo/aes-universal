@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
   AbstractGcmCipher,
-  GcmEncryptInternalArgs,
-  GcmDecryptInternalArgs,
+  GcmEncryptInternalParams,
+  GcmDecryptInternalParams,
 } from '../AbstractGcmCipher';
 import { RandomBytes } from '@/common/types';
 
@@ -30,14 +30,14 @@ const keyConfigs = [
 
 // Mock implementation for testing
 class MockGcmCipher extends AbstractGcmCipher {
-  encryptInternal = async (_args: GcmEncryptInternalArgs) => {
+  encryptInternal = async (_args: GcmEncryptInternalParams) => {
     return {
       ciphertext: new Uint8Array([1, 2, 3]),
       tag: new Uint8Array(16).fill(0x42),
     };
   };
 
-  decryptInternal = async (_args: GcmDecryptInternalArgs) => {
+  decryptInternal = async (_args: GcmDecryptInternalParams) => {
     return new Uint8Array([4, 5, 6]);
   };
 }

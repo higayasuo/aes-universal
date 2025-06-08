@@ -1,4 +1,4 @@
-import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
+import { Cipher, DecryptParams, EncryptParams, EncryptResult } from '../Cipher';
 import { isGcmEnc } from '@/constants/Enc';
 import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
 import { RandomBytes } from '@/common/types';
@@ -7,9 +7,9 @@ import { gcmVerifyIvLength } from './utils/gcmVerifyIvLength';
 import { gcmVerifyTagLength } from './utils/gcmVerifyTagLength';
 
 /**
- * Arguments required for the internal GCM encryption process.
+ * Parameters required for the internal GCM encryption process.
  */
-export type GcmEncryptInternalArgs = {
+export type GcmEncryptInternalParams = {
   /**
    * The raw encryption key as a Uint8Array.
    */
@@ -47,9 +47,9 @@ export type GcmEncryptInternalResult = {
 };
 
 /**
- * Arguments required for the internal GCM decryption process.
+ * Parameters required for the internal GCM decryption process.
  */
-export type GcmDecryptInternalArgs = {
+export type GcmDecryptInternalParams = {
   /**
    * The raw encryption key as a Uint8Array.
    */
@@ -106,9 +106,9 @@ export abstract class AbstractGcmCipher implements Cipher {
     plaintext,
     cek,
     aad,
-  }: EncryptArgs): Promise<EncryptResult> => {
+  }: EncryptParams): Promise<EncryptResult> => {
     if (!isGcmEnc(enc)) {
-      throw new Error('Invalid encryption algorithm');
+      throw new Error(`Invalid encryption algorithm: ${enc}`);
     }
 
     const keyBitLength = parseKeyBitLength(enc);
@@ -142,9 +142,9 @@ export abstract class AbstractGcmCipher implements Cipher {
     iv,
     tag,
     aad,
-  }: DecryptArgs): Promise<Uint8Array> => {
+  }: DecryptParams): Promise<Uint8Array> => {
     if (!isGcmEnc(enc)) {
-      throw new Error('Invalid encryption algorithm');
+      throw new Error(`Invalid encryption algorithm: ${enc}`);
     }
 
     gcmVerifyTagLength(tag);
@@ -176,7 +176,7 @@ export abstract class AbstractGcmCipher implements Cipher {
    * @returns A promise that resolves to the encrypted data as a Uint8Array.
    */
   encryptInternal = (
-    _: GcmEncryptInternalArgs,
+    _: GcmEncryptInternalParams,
   ): Promise<GcmEncryptInternalResult> => {
     throw new Error('Not implemented');
   };
@@ -186,7 +186,7 @@ export abstract class AbstractGcmCipher implements Cipher {
    * @param args - The arguments required for GCM decryption.
    * @returns A promise that resolves to the decrypted data as a Uint8Array.
    */
-  decryptInternal = (_: GcmDecryptInternalArgs): Promise<Uint8Array> => {
+  decryptInternal = (_: GcmDecryptInternalParams): Promise<Uint8Array> => {
     throw new Error('Not implemented');
   };
 }

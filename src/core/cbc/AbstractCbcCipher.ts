@@ -1,4 +1,4 @@
-import { Cipher, DecryptArgs, EncryptArgs, EncryptResult } from '../Cipher';
+import { Cipher, DecryptParams, EncryptParams, EncryptResult } from '../Cipher';
 import { generateMacData } from './utils/generateMacData';
 import { isCbcEnc } from '@/constants/Enc';
 import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
@@ -10,9 +10,9 @@ import { cbcVerifyTagLength } from './utils/cbcVerifyTagLength';
 import { cbcVerifyIvLength } from './utils/cbcVerifyIvLength';
 
 /**
- * Arguments required for the internal CBC encryption process.
+ * Parameters required for the internal CBC encryption process.
  */
-export type CbcEncryptInternalArgs = {
+export type CbcEncryptInternalParams = {
   /** The raw encryption key as a Uint8Array. */
   encRawKey: Uint8Array;
   /** The initialization vector as a Uint8Array. */
@@ -22,9 +22,9 @@ export type CbcEncryptInternalArgs = {
 };
 
 /**
- * Arguments required for the internal CBC decryption process.
+ * Parameters required for the internal CBC decryption process.
  */
-export type CbcDecryptInternalArgs = {
+export type CbcDecryptInternalParams = {
   /** The raw encryption key as a Uint8Array. */
   encRawKey: Uint8Array;
   /** The initialization vector as a Uint8Array. */
@@ -34,9 +34,9 @@ export type CbcDecryptInternalArgs = {
 };
 
 /**
- * Arguments required for generating a tag.
+ * Parameters required for generating a tag.
  */
-export type GenerateTagArgs = {
+export type GenerateTagParams = {
   /** The raw MAC key as a Uint8Array. */
   macRawKey: Uint8Array;
   /** The MAC data as a Uint8Array. */
@@ -75,9 +75,9 @@ export abstract class AbstractCbcCipher implements Cipher {
     plaintext,
     cek,
     aad,
-  }: EncryptArgs): Promise<EncryptResult> => {
+  }: EncryptParams): Promise<EncryptResult> => {
     if (!isCbcEnc(enc)) {
-      throw new Error('Invalid encryption algorithm');
+      throw new Error(`Invalid encryption algorithm: ${enc}`);
     }
 
     const iv = this.generateIv();
@@ -121,9 +121,9 @@ export abstract class AbstractCbcCipher implements Cipher {
     iv,
     tag,
     aad,
-  }: DecryptArgs): Promise<Uint8Array> => {
+  }: DecryptParams): Promise<Uint8Array> => {
     if (!isCbcEnc(enc)) {
-      throw new Error('Invalid encryption algorithm');
+      throw new Error(`Invalid encryption algorithm: ${enc}`);
     }
 
     cbcVerifyIvLength(iv);
@@ -167,7 +167,7 @@ export abstract class AbstractCbcCipher implements Cipher {
    * @param args - The arguments required for encryption.
    * @returns A promise that resolves to the encrypted data as a Uint8Array.
    */
-  encryptInternal = (_: CbcEncryptInternalArgs): Promise<Uint8Array> => {
+  encryptInternal = (_: CbcEncryptInternalParams): Promise<Uint8Array> => {
     throw new Error('Not implemented');
   };
 
@@ -176,7 +176,7 @@ export abstract class AbstractCbcCipher implements Cipher {
    * @param args - The arguments required for decryption.
    * @returns A promise that resolves to the decrypted data as a Uint8Array.
    */
-  decryptInternal = (_: CbcDecryptInternalArgs): Promise<Uint8Array> => {
+  decryptInternal = (_: CbcDecryptInternalParams): Promise<Uint8Array> => {
     throw new Error('Not implemented');
   };
 
@@ -185,7 +185,7 @@ export abstract class AbstractCbcCipher implements Cipher {
    * @param args - The arguments required for tag generation.
    * @returns A promise that resolves to the generated tag as a Uint8Array.
    */
-  generateTag = (_: GenerateTagArgs): Promise<Uint8Array> => {
+  generateTag = (_: GenerateTagParams): Promise<Uint8Array> => {
     throw new Error('Not implemented');
   };
 }

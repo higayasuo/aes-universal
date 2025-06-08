@@ -12,6 +12,7 @@ A universal AES encryption/decryption library that works on both web and native 
 - Consistent behavior across platforms
 - TypeScript support
 - Detailed error messages for debugging
+- Automatic CEK generation with correct key lengths
 
 ## Installation
 
@@ -24,9 +25,100 @@ npm install aes-universal
 This package requires the following peer dependencies:
 
 - `@noble/hashes`: For cryptographic hash functions
-- `@higayasuo/u8a-utils`: For Uint8Array utilities
+- `u8a-utils`: For Uint8Array utilities
 - `aes-universal-web`: Web implementation
 - `aes-universal-native`: Native implementation
+
+## Usage
+
+The library provides platform-specific implementations that automatically handle both CBC and GCM encryption modes. The `generateCek` method automatically generates the correct key length for each encryption mode.
+
+```typescript
+import { WebAesCipher } from 'aes-universal-web';
+import { NativeAesCipher } from 'aes-universal-native';
+import { webCryptoModule } from 'expo-crypto-universal-web';
+import { nativeCryptoModule } from 'expo-crypto-universal-native';
+
+const isWeb = typeof crypto?.getRandomValues === 'function';
+const randomBytes = isWeb
+  ? webCryptoModule.getRandomBytes
+  : nativeCryptoModule.getRandomBytes;
+
+// Create cipher instance based on platform
+const cipher = isWeb
+  ? new WebAesCipher(randomBytes)
+  : new NativeAesCipher(randomBytes);
+
+// Define plaintext
+const plaintext = new Uint8Array([1, 2, 3, 4]);
+
+// Additional authenticated data
+const aad = new Uint8Array([5, 6, 7, 8]);
+
+// Define encryption modes
+const cbcEnc = 'A128CBC-HS256';
+const gcmEnc = 'A128GCM';
+
+// Generate CEK for CBC mode
+const cek = cipher.generateCek(cbcEnc); // Automatically generates 32 bytes (16 for encryption + 16 for MAC)
+
+// Encrypt data using CBC mode
+const { ciphertext, tag, iv } = await cipher.encrypt({
+  enc: cbcEnc,
+  cek,
+  plaintext,
+  aad,
+});
+
+// Decrypt data
+const decrypted = await cipher.decrypt({
+  enc: cbcEnc,
+  cek,
+  ciphertext,
+  tag,
+  iv,
+  aad,
+});
+
+expect(decrypted).toEqual(plaintext);
+
+// The same cipher instance can be used for GCM mode
+const gcmCek = cipher.generateCek(gcmEnc); // Automatically generates 16 bytes
+
+const gcmResult = await cipher.encrypt({
+  enc: gcmEnc,
+  cek: gcmCek,
+  plaintext,
+  aad,
+});
+
+const gcmDecrypted = await cipher.decrypt({
+  enc: gcmEnc,
+  cek: gcmCek,
+  ciphertext: gcmResult.ciphertext,
+  tag: gcmResult.tag,
+  iv: gcmResult.iv,
+  aad,
+});
+
+expect(gcmDecrypted).toEqual(plaintext);
+```
+
+## Key Lengths
+
+The library automatically handles key lengths for different encryption modes:
+
+### CBC Mode
+
+- A128CBC-HS256: 32 bytes (16 for encryption + 16 for MAC)
+- A192CBC-HS384: 48 bytes (24 for encryption + 24 for MAC)
+- A256CBC-HS512: 64 bytes (32 for encryption + 32 for MAC)
+
+### GCM Mode
+
+- A128GCM: 16 bytes
+- A192GCM: 24 bytes
+- A256GCM: 32 bytes
 
 ## Error Messages
 
@@ -40,10 +132,6 @@ The library provides detailed error messages to help with debugging:
   Invalid CBC content encryption key length: expected {expectedLength} bytes ({keyBits} bits), but got {actualLength} bytes
   ```
 
-  - A128CBC-HS256: 32 bytes (16 for encryption + 16 for MAC)
-  - A192CBC-HS384: 48 bytes (24 for encryption + 24 for MAC)
-  - A256CBC-HS512: 64 bytes (32 for encryption + 32 for MAC)
-
 - Initialization Vector (IV) length errors:
 
   ```
@@ -54,9 +142,6 @@ The library provides detailed error messages to help with debugging:
   ```
   Invalid CBC authentication tag length: expected {expectedLength} bytes ({keyBits} bits), but got {actualLength} bytes
   ```
-  - A128CBC-HS256: 16 bytes
-  - A192CBC-HS384: 24 bytes
-  - A256CBC-HS512: 32 bytes
 
 ### GCM Mode
 
@@ -65,10 +150,6 @@ The library provides detailed error messages to help with debugging:
   ```
   Invalid GCM content encryption key length: expected {expectedLength} bytes ({keyBits} bits), but got {actualLength} bytes
   ```
-
-  - A128GCM: 16 bytes
-  - A192GCM: 24 bytes
-  - A256GCM: 32 bytes
 
 - Initialization Vector (IV) length errors:
 
@@ -80,374 +161,6 @@ The library provides detailed error messages to help with debugging:
   ```
   Invalid GCM authentication tag length: expected 16 bytes, but got {actualLength} bytes
   ```
-
-## AES-128
-
-### CBC Mode (A128CBC-HS256)
-
-In CBC mode, the Content Encryption Key (CEK) includes both the encryption key and the MAC key:
-
-- A128CBC-HS256: 32 bytes (16 bytes for encryption + 16 bytes for MAC)
-
-```typescript
-import { webCryptoModule } from 'expo-crypto-universal-web';
-import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebCbcCipher } from 'aes-universal-web';
-import { NativeCbcCipher } from 'aes-universal-native';
-
-const isWeb = typeof crypto?.getRandomValues === 'function';
-
-const getRandomBytes = isWeb
-  ? webCryptoModule.getRandomBytes
-  : nativeCryptoModule.getRandomBytes;
-
-// Create cipher instance based on platform
-const cipher = isWeb
-  ? new WebCbcCipher(getRandomBytes)
-  : new NativeCbcCipher(getRandomBytes);
-
-// Define plaintext
-const plaintext = new Uint8Array([1, 2, 3, 4]);
-
-// Additional authenticated data
-const aad = new Uint8Array([5, 6, 7, 8]);
-
-// Generate random CEK for AES-128-CBC-HS256
-const cek = getRandomBytes(32); // 32 bytes (16 for encryption + 16 for MAC)
-
-// Encrypt data
-const { ciphertext, tag, iv } = await cipher.encrypt({
-  enc: 'A128CBC-HS256', // AES-128 in CBC mode with HMAC-SHA-256
-  cek,
-  plaintext,
-  aad, // Must use the same AAD for decryption
-});
-
-// Decrypt data
-const decrypted = await cipher.decrypt({
-  enc: 'A128CBC-HS256',
-  cek,
-  ciphertext,
-  tag,
-  iv,
-  aad, // Must use the same AAD as encryption
-});
-
-expect(decrypted).toEqual(plaintext);
-```
-
-### GCM Mode (A128GCM)
-
-In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
-
-- A128GCM: 16 bytes
-
-```typescript
-import { webCryptoModule } from 'expo-crypto-universal-web';
-import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebGcmCipher } from 'aes-universal-web';
-import { NativeGcmCipher } from 'aes-universal-native';
-
-const isWeb = typeof crypto?.getRandomValues === 'function';
-
-const getRandomBytes = isWeb
-  ? webCryptoModule.getRandomBytes
-  : nativeCryptoModule.getRandomBytes;
-
-// Create cipher instance based on platform
-const cipher = isWeb
-  ? new WebGcmCipher(getRandomBytes)
-  : new NativeGcmCipher(getRandomBytes);
-
-// Define plaintext
-const plaintext = new Uint8Array([1, 2, 3, 4]);
-
-// Additional authenticated data
-const aad = new Uint8Array([5, 6, 7, 8]);
-
-// Generate random CEK for AES-128-GCM
-const cek = getRandomBytes(16); // 16 bytes
-
-// Encrypt data
-const { ciphertext, tag, iv } = await cipher.encrypt({
-  enc: 'A128GCM', // AES-128 in GCM mode
-  cek,
-  plaintext,
-  aad, // Must use the same AAD for decryption
-});
-
-// Decrypt data
-const decrypted = await cipher.decrypt({
-  enc: 'A128GCM',
-  cek,
-  ciphertext,
-  tag,
-  iv,
-  aad, // Must use the same AAD as encryption
-});
-
-expect(decrypted).toEqual(plaintext);
-```
-
-## AES-192
-
-### CBC Mode (A192CBC-HS384)
-
-In CBC mode, the Content Encryption Key (CEK) includes both the encryption key and the MAC key:
-
-- A192CBC-HS384: 48 bytes (24 bytes for encryption + 24 bytes for MAC)
-
-```typescript
-import { webCryptoModule } from 'expo-crypto-universal-web';
-import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebCbcCipher } from 'aes-universal-web';
-import { NativeCbcCipher } from 'aes-universal-native';
-
-const isWeb = typeof crypto?.getRandomValues === 'function';
-
-const getRandomBytes = isWeb
-  ? webCryptoModule.getRandomBytes
-  : nativeCryptoModule.getRandomBytes;
-
-// Create cipher instance based on platform
-const cipher = isWeb
-  ? new WebCbcCipher(getRandomBytes)
-  : new NativeCbcCipher(getRandomBytes);
-
-// Define plaintext
-const plaintext = new Uint8Array([1, 2, 3, 4]);
-
-// Additional authenticated data
-const aad = new Uint8Array([5, 6, 7, 8]);
-
-// Generate random CEK for AES-192-CBC-HS384
-const cek = getRandomBytes(48); // 48 bytes (24 for encryption + 24 for MAC)
-
-// Encrypt data
-const { ciphertext, tag, iv } = await cipher.encrypt({
-  enc: 'A192CBC-HS384', // AES-192 in CBC mode with HMAC-SHA-384
-  cek,
-  plaintext,
-  aad, // Must use the same AAD for decryption
-});
-
-// Decrypt data
-const decrypted = await cipher.decrypt({
-  enc: 'A192CBC-HS384',
-  cek,
-  ciphertext,
-  tag,
-  iv,
-  aad, // Must use the same AAD as encryption
-});
-
-expect(decrypted).toEqual(plaintext);
-```
-
-### GCM Mode (A192GCM)
-
-In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
-
-- A192GCM: 24 bytes
-
-```typescript
-import { webCryptoModule } from 'expo-crypto-universal-web';
-import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebGcmCipher } from 'aes-universal-web';
-import { NativeGcmCipher } from 'aes-universal-native';
-
-const isWeb = typeof crypto?.getRandomValues === 'function';
-
-const getRandomBytes = isWeb
-  ? webCryptoModule.getRandomBytes
-  : nativeCryptoModule.getRandomBytes;
-
-// Create cipher instance based on platform
-const cipher = isWeb
-  ? new WebGcmCipher(getRandomBytes)
-  : new NativeGcmCipher(getRandomBytes);
-
-// Define plaintext
-const plaintext = new Uint8Array([1, 2, 3, 4]);
-
-// Additional authenticated data
-const aad = new Uint8Array([5, 6, 7, 8]);
-
-// Generate random CEK for AES-192-GCM
-const cek = getRandomBytes(24); // 24 bytes
-
-// Encrypt data
-const { ciphertext, tag, iv } = await cipher.encrypt({
-  enc: 'A192GCM', // AES-192 in GCM mode
-  cek,
-  plaintext,
-  aad, // Must use the same AAD for decryption
-});
-
-// Decrypt data
-const decrypted = await cipher.decrypt({
-  enc: 'A192GCM',
-  cek,
-  ciphertext,
-  tag,
-  iv,
-  aad, // Must use the same AAD as encryption
-});
-
-expect(decrypted).toEqual(plaintext);
-```
-
-## AES-256
-
-### CBC Mode (A256CBC-HS512)
-
-In CBC mode, the Content Encryption Key (CEK) includes both the encryption key and the MAC key:
-
-- A256CBC-HS512: 64 bytes (32 bytes for encryption + 32 bytes for MAC)
-
-```typescript
-import { webCryptoModule } from 'expo-crypto-universal-web';
-import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebCbcCipher } from 'aes-universal-web';
-import { NativeCbcCipher } from 'aes-universal-native';
-
-const isWeb = typeof crypto?.getRandomValues === 'function';
-
-const getRandomBytes = isWeb
-  ? webCryptoModule.getRandomBytes
-  : nativeCryptoModule.getRandomBytes;
-
-// Create cipher instance based on platform
-const cipher = isWeb
-  ? new WebCbcCipher(getRandomBytes)
-  : new NativeCbcCipher(getRandomBytes);
-
-// Define plaintext
-const plaintext = new Uint8Array([1, 2, 3, 4]);
-
-// Additional authenticated data
-const aad = new Uint8Array([5, 6, 7, 8]);
-
-// Generate random CEK for AES-256-CBC-HS512
-const cek = getRandomBytes(64); // 64 bytes (32 for encryption + 32 for MAC)
-
-// Encrypt data
-const { ciphertext, tag, iv } = await cipher.encrypt({
-  enc: 'A256CBC-HS512', // AES-256 in CBC mode with HMAC-SHA-512
-  cek,
-  plaintext,
-  aad, // Must use the same AAD for decryption
-});
-
-// Decrypt data
-const decrypted = await cipher.decrypt({
-  enc: 'A256CBC-HS512',
-  cek,
-  ciphertext,
-  tag,
-  iv,
-  aad, // Must use the same AAD as encryption
-});
-
-expect(decrypted).toEqual(plaintext);
-```
-
-### GCM Mode (A256GCM)
-
-In GCM mode, the Content Encryption Key (CEK) is used directly for encryption:
-
-- A256GCM: 32 bytes
-
-```typescript
-import { webCryptoModule } from 'expo-crypto-universal-web';
-import { nativeCryptoModule } from 'expo-crypto-universal-native';
-import { WebGcmCipher } from 'aes-universal-web';
-import { NativeGcmCipher } from 'aes-universal-native';
-
-const isWeb = typeof crypto?.getRandomValues === 'function';
-
-const getRandomBytes = isWeb
-  ? webCryptoModule.getRandomBytes
-  : nativeCryptoModule.getRandomBytes;
-
-// Create cipher instance based on platform
-const cipher = isWeb
-  ? new WebGcmCipher(getRandomBytes)
-  : new NativeGcmCipher(getRandomBytes);
-
-// Define plaintext
-const plaintext = new Uint8Array([1, 2, 3, 4]);
-
-// Additional authenticated data
-const aad = new Uint8Array([5, 6, 7, 8]);
-
-// Generate random CEK for AES-256-GCM
-const cek = getRandomBytes(32); // 32 bytes
-
-// Encrypt data
-const { ciphertext, tag, iv } = await cipher.encrypt({
-  enc: 'A256GCM', // AES-256 in GCM mode
-  cek,
-  plaintext,
-  aad, // Must use the same AAD for decryption
-});
-
-// Decrypt data
-const decrypted = await cipher.decrypt({
-  enc: 'A256GCM',
-  cek,
-  ciphertext,
-  tag,
-  iv,
-  aad, // Must use the same AAD as encryption
-});
-
-expect(decrypted).toEqual(plaintext);
-```
-
-## Encryption Data Serialization
-
-The library provides utilities for serializing and deserializing encryption data using CBOR (Concise Binary Object Representation).
-
-```typescript
-import { encodeEncryptionData, decodeEncryptionData } from 'aes-universal';
-
-// After encryption
-const { ciphertext, tag, iv } = await cipher.encrypt({
-  enc: 'A128GCM',
-  cek,
-  plaintext,
-  aad,
-});
-
-// Serialize encryption data
-const serialized = encodeEncryptionData({
-  ciphertext,
-  iv,
-  tag,
-  aad,
-});
-
-// Store serialized data in database or file
-// ...
-
-// Later, deserialize the data
-const deserialized = decodeEncryptionData(serialized);
-
-// Use deserialized data for decryption
-const decrypted = await cipher.decrypt({
-  enc: 'A128GCM',
-  cek,
-  ciphertext: deserialized.ciphertext,
-  tag: deserialized.tag,
-  iv: deserialized.iv,
-  aad: deserialized.aad,
-});
-```
-
-The `encodeEncryptionData` function takes an object containing the encryption components and returns a single `Uint8Array` encoded in CBOR format. The `decodeEncryptionData` function takes the encoded data and returns the original encryption components.
-
-This serialization method is particularly useful when you need to store encrypted data in a database or file, as it combines all the necessary components into a single binary format.
 
 ## Platform Support
 
