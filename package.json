@@ -1,6 +1,6 @@
 {
   "name": "aes-universal",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Universal AES encryption/decryption library that works on both web and native platforms",
   "private": false,
   "type": "module",

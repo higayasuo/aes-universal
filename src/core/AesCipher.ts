@@ -36,10 +36,14 @@ export type AesCipherConstructorParams<
  * @template GCMConstructor - The constructor type for the GCM cipher
  */
 export class AesCipher<
-  CBC extends AbstractCbcCipher,
-  CBCConstructor extends new (...args: any[]) => CBC,
-  GCM extends AbstractGcmCipher,
-  GCMConstructor extends new (...args: any[]) => GCM,
+  CBC extends AbstractCbcCipher = AbstractCbcCipher,
+  CBCConstructor extends new (...args: any[]) => CBC = new (
+    ...args: any[]
+  ) => CBC,
+  GCM extends AbstractGcmCipher = AbstractGcmCipher,
+  GCMConstructor extends new (...args: any[]) => GCM = new (
+    ...args: any[]
+  ) => GCM,
 > implements Cipher
 {
   /** The CBC cipher instance */

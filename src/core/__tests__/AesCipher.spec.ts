@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { AesCipher } from '../AesCipher';
 import {
   AbstractCbcCipher,
@@ -54,10 +54,14 @@ class MockGcmCipher extends AbstractGcmCipher {
 describe('AesCipher', () => {
   const randomBytes: RandomBytes = (size = 32) =>
     new Uint8Array(size).fill(0x42);
-  const cipher = new AesCipher({
-    cbc: MockCbcCipher,
-    gcm: MockGcmCipher,
-    randomBytes,
+  let cipher: AesCipher;
+
+  beforeEach(() => {
+    cipher = new AesCipher({
+      cbc: MockCbcCipher,
+      gcm: MockGcmCipher,
+      randomBytes,
+    });
   });
 
   describe('encrypt', () => {
