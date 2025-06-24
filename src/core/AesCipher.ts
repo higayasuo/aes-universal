@@ -51,7 +51,7 @@ export class AesCipher<
   /** The GCM cipher instance */
   private gcm: GCM;
   /** The function used to generate random bytes */
-  private randomBytes: RandomBytes;
+  readonly randomBytes: RandomBytes;
 
   /**
    * Constructs an AesCipher instance.

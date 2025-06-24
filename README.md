@@ -31,7 +31,7 @@ This package requires the following peer dependencies:
 
 ## Usage
 
-The library provides platform-specific implementations that automatically handle both CBC and GCM encryption modes. The `generateCek` method automatically generates the correct key length for each encryption mode.
+The library provides platform-specific implementations that automatically handle both CBC and GCM encryption modes. The `generateCek` method automatically generates the correct key length for each encryption mode. The `Cipher` interface includes a `randomBytes` property that provides access to the random bytes generation function used by the cipher.
 
 ```typescript
 import { WebAesCipher } from 'aes-universal-web';

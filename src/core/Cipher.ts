@@ -1,3 +1,4 @@
+import { RandomBytes } from '@/common/types';
 import { Enc } from '@/constants/Enc';
 
 /**
@@ -48,6 +49,11 @@ export type DecryptParams = {
  * Interface for cryptographic cipher operations.
  */
 export interface Cipher {
+  /**
+   * Function to generate random bytes.
+   * @type {RandomBytes}
+   */
+  randomBytes: RandomBytes;
   /**
    * Encrypts data using the specified algorithm and parameters.
    * @param {EncryptParams} args - The encryption parameters.

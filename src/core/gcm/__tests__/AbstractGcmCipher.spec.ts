@@ -189,6 +189,24 @@ describe('AbstractGcmCipher', () => {
       const cipher = new MockGcmCipher(randomBytes);
       expect(cipher).toBeInstanceOf(MockGcmCipher);
     });
+
+    it('should set randomBytes as a public readonly property', () => {
+      const randomBytes = vi
+        .fn()
+        .mockImplementation((size) => new Uint8Array(size).fill(0x42));
+      const cipher = new MockGcmCipher(randomBytes);
+
+      // Test that randomBytes is accessible
+      expect(cipher.randomBytes).toBeDefined();
+      expect(typeof cipher.randomBytes).toBe('function');
+
+      // Test that it's the same function that was passed to constructor
+      expect(cipher.randomBytes).toBe(randomBytes);
+
+      // Test that it works correctly
+      const result = cipher.randomBytes(12);
+      expect(result).toEqual(new Uint8Array(12).fill(0x42));
+    });
   });
 
   describe('generateIv', () => {

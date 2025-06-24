@@ -82,7 +82,7 @@ export type GcmDecryptInternalParams = {
  */
 export abstract class AbstractGcmCipher implements Cipher {
   /** The function used to generate random bytes. */
-  protected randomBytes: RandomBytes;
+  readonly randomBytes: RandomBytes;
 
   /**
    * Constructs an AbstractGcmCipher instance.

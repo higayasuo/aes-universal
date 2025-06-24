@@ -51,7 +51,7 @@ export type GenerateTagParams = {
  */
 export abstract class AbstractCbcCipher implements Cipher {
   /** The function used to generate random bytes. */
-  protected randomBytes: RandomBytes;
+  readonly randomBytes: RandomBytes;
 
   /**
    * Constructs an AbstractCbcCipher instance.
