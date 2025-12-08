@@ -1,10 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   AbstractGcmCipher,
   GcmEncryptInternalParams,
   GcmDecryptInternalParams,
 } from '../AbstractGcmCipher';
-import { RandomBytes } from '@/common/types';
 
 // Key configurations for testing
 const keyConfigs = [
@@ -43,14 +42,10 @@ class MockGcmCipher extends AbstractGcmCipher {
 }
 
 describe('AbstractGcmCipher', () => {
-  let randomBytes: RandomBytes;
   let cipher: MockGcmCipher;
 
   beforeEach(() => {
-    randomBytes = vi
-      .fn()
-      .mockImplementation((size) => new Uint8Array(size).fill(0x42));
-    cipher = new MockGcmCipher(randomBytes);
+    cipher = new MockGcmCipher();
   });
 
   describe('encrypt', () => {
@@ -59,19 +54,20 @@ describe('AbstractGcmCipher', () => {
       async ({ enc, cekLength }) => {
         const cek = new Uint8Array(cekLength);
         const plaintext = new Uint8Array([1, 2, 3]);
+        const iv = new Uint8Array(12);
         const aad = new Uint8Array([4, 5, 6]);
 
         const result = await cipher.encrypt({
           enc,
           cek,
           plaintext,
+          iv,
           aad,
         });
 
         expect(result).toBeDefined();
         expect(result.ciphertext).toBeDefined();
         expect(result.tag).toBeDefined();
-        expect(result.iv).toBeDefined();
       },
     );
 
@@ -80,6 +76,7 @@ describe('AbstractGcmCipher', () => {
       async ({ enc, invalidCekLength }) => {
         const cek = new Uint8Array(invalidCekLength);
         const plaintext = new Uint8Array([1, 2, 3]);
+        const iv = new Uint8Array(12);
         const aad = new Uint8Array([4, 5, 6]);
 
         await expect(
@@ -87,6 +84,7 @@ describe('AbstractGcmCipher', () => {
             enc,
             cek,
             plaintext,
+            iv,
             aad,
           }),
         ).rejects.toThrow('Invalid GCM content encryption key length');
@@ -181,41 +179,18 @@ describe('AbstractGcmCipher', () => {
     });
   });
 
-  describe('constructor', () => {
-    it('should initialize with the provided randomBytes function', () => {
-      const randomBytes = vi
-        .fn()
-        .mockImplementation((size) => new Uint8Array(size).fill(0x42));
-      const cipher = new MockGcmCipher(randomBytes);
-      expect(cipher).toBeInstanceOf(MockGcmCipher);
-    });
-
-    it('should set randomBytes as a public readonly property', () => {
-      const randomBytes = vi
-        .fn()
-        .mockImplementation((size) => new Uint8Array(size).fill(0x42));
-      const cipher = new MockGcmCipher(randomBytes);
-
-      // Test that randomBytes is accessible
-      expect(cipher.randomBytes).toBeDefined();
-      expect(typeof cipher.randomBytes).toBe('function');
-
-      // Test that it's the same function that was passed to constructor
-      expect(cipher.randomBytes).toBe(randomBytes);
-
-      // Test that it works correctly
-      const result = cipher.randomBytes(12);
-      expect(result).toEqual(new Uint8Array(12).fill(0x42));
+  describe('getIvByteLength', () => {
+    it('should return 12 for GCM mode', () => {
+      expect(cipher.getIvByteLength()).toBe(12);
     });
   });
 
-  describe('generateIv', () => {
-    it('should generate a 12-byte IV', () => {
-      const iv = cipher.generateIv();
-      expect(iv).toBeInstanceOf(Uint8Array);
-      expect(iv.length).toBe(12);
-      expect(randomBytes).toHaveBeenCalledWith(12);
-      expect(iv.every((byte) => byte === 0x42)).toBe(true);
-    });
+  describe('getCekByteLength', () => {
+    it.each(keyConfigs)(
+      'should return correct CEK byte length for $enc',
+      ({ enc, cekLength }) => {
+        expect(cipher.getCekByteLength(enc)).toBe(cekLength);
+      },
+    );
   });
 });

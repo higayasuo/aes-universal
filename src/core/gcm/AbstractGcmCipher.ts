@@ -1,10 +1,10 @@
 import { Cipher, DecryptParams, EncryptParams, EncryptResult } from '../Cipher';
-import { isGcmEnc } from '@/constants/Enc';
+import { Enc, isGcmEnc } from '@/constants/Enc';
 import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
-import { RandomBytes } from '@/common/types';
 import { gcmVerifyCekLength } from './utils/gcmVerifyCekLength';
 import { gcmVerifyIvLength } from './utils/gcmVerifyIvLength';
 import { gcmVerifyTagLength } from './utils/gcmVerifyTagLength';
+import { gcmGetCekByteLength } from './utils/gcmGetCekByteLength';
 
 /**
  * Parameters required for the internal GCM encryption process.
@@ -81,22 +81,12 @@ export type GcmDecryptInternalParams = {
  * Implements the Cipher interface.
  */
 export abstract class AbstractGcmCipher implements Cipher {
-  /** The function used to generate random bytes. */
-  readonly randomBytes: RandomBytes;
-
-  /**
-   * Constructs an AbstractGcmCipher instance.
-   * @param randomBytes - The function used to generate random bytes.
-   */
-  constructor(randomBytes: RandomBytes) {
-    this.randomBytes = randomBytes;
-  }
-
   /**
    * Encrypts the given plaintext using the specified encryption algorithm.
    * @param enc - The encryption algorithm to use.
    * @param plaintext - The plaintext data to encrypt.
    * @param cek - The content encryption key.
+   * @param iv - The initialization vector.
    * @param aad - Additional authenticated data.
    * @returns A promise that resolves to the encryption result.
    * @throws Will throw an error if the encryption algorithm is invalid.
@@ -105,16 +95,18 @@ export abstract class AbstractGcmCipher implements Cipher {
     enc,
     plaintext,
     cek,
+    iv,
     aad,
   }: EncryptParams): Promise<EncryptResult> => {
     if (!isGcmEnc(enc)) {
       throw new Error(`Invalid encryption algorithm: ${enc}`);
     }
 
+    gcmVerifyIvLength(iv);
+
     const keyBitLength = parseKeyBitLength(enc);
     gcmVerifyCekLength(cek, keyBitLength);
 
-    const iv = this.generateIv();
     const { ciphertext, tag } = await this.encryptInternal({
       encRawKey: cek,
       plaintext,
@@ -122,7 +114,7 @@ export abstract class AbstractGcmCipher implements Cipher {
       aad,
     });
 
-    return { ciphertext, tag, iv };
+    return { ciphertext, tag };
   };
 
   /**
@@ -165,10 +157,19 @@ export abstract class AbstractGcmCipher implements Cipher {
   };
 
   /**
-   * Generates an initialization vector (IV) for the given encryption algorithm.
-   * @returns A Uint8Array representing the generated IV.
+   * Returns the byte length of the initialization vector (IV) for GCM encryption.
+   * For GCM mode, the IV is always 12 bytes.
+   * @returns The IV byte length as a number (always 12 for GCM).
    */
-  generateIv = () => this.randomBytes(12);
+  getIvByteLength = () => 12;
+
+  /**
+   * Returns the required byte length of the content encryption key (CEK) for the given GCM encryption algorithm.
+   * For GCM mode, the CEK length matches the key length.
+   * @param enc - The encryption algorithm identifier.
+   * @returns The required CEK byte length for the specified GCM algorithm.
+   */
+  getCekByteLength = (enc: Enc) => gcmGetCekByteLength(enc);
 
   /**
    * Abstract method for the internal encryption process.
