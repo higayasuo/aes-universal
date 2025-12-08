@@ -1,3 +1,4 @@
+export * from './cbcGetCekByteLength';
 export * from './cbcVerifyCekLength';
 export * from './cbcVerifyIvLength';
 export * from './cbcVerifyTagLength';
