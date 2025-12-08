@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   AbstractCbcCipher,
   CbcEncryptInternalParams,
@@ -56,10 +56,7 @@ describe('AbstractCbcCipher', () => {
   let cipher: MockCbcCipher;
 
   beforeEach(() => {
-    const randomBytes = vi
-      .fn()
-      .mockImplementation((size) => new Uint8Array(size).fill(0x42));
-    cipher = new MockCbcCipher(randomBytes);
+    cipher = new MockCbcCipher();
   });
 
   describe('encrypt', () => {
@@ -68,19 +65,20 @@ describe('AbstractCbcCipher', () => {
       async ({ enc, cekLength }) => {
         const cek = new Uint8Array(cekLength);
         const plaintext = new Uint8Array([1, 2, 3]);
+        const iv = new Uint8Array(16);
         const aad = new Uint8Array([4, 5, 6]);
 
         const result = await cipher.encrypt({
           enc,
           cek,
           plaintext,
+          iv,
           aad,
         });
 
         expect(result).toBeDefined();
         expect(result.ciphertext).toBeDefined();
         expect(result.tag).toBeDefined();
-        expect(result.iv).toBeDefined();
       },
     );
 
@@ -89,6 +87,7 @@ describe('AbstractCbcCipher', () => {
       async ({ enc, cekLength }) => {
         const cek = new Uint8Array(cekLength - 1);
         const plaintext = new Uint8Array([1, 2, 3]);
+        const iv = new Uint8Array(16);
         const aad = new Uint8Array([4, 5, 6]);
 
         await expect(
@@ -96,6 +95,7 @@ describe('AbstractCbcCipher', () => {
             enc,
             cek,
             plaintext,
+            iv,
             aad,
           }),
         ).rejects.toThrow('Invalid CBC content encryption key length');
@@ -192,45 +192,18 @@ describe('AbstractCbcCipher', () => {
     );
   });
 
-  describe('constructor', () => {
-    it('should initialize with the provided randomBytes function', () => {
-      const randomBytes = vi
-        .fn()
-        .mockImplementation((size) => new Uint8Array(size).fill(0x42));
-      const cipher = new MockCbcCipher(randomBytes);
-      expect(cipher).toBeInstanceOf(MockCbcCipher);
-    });
-
-    it('should set randomBytes as a public readonly property', () => {
-      const randomBytes = vi
-        .fn()
-        .mockImplementation((size) => new Uint8Array(size).fill(0x42));
-      const cipher = new MockCbcCipher(randomBytes);
-
-      // Test that randomBytes is accessible
-      expect(cipher.randomBytes).toBeDefined();
-      expect(typeof cipher.randomBytes).toBe('function');
-
-      // Test that it's the same function that was passed to constructor
-      expect(cipher.randomBytes).toBe(randomBytes);
-
-      // Test that it works correctly
-      const result = cipher.randomBytes(16);
-      expect(result).toEqual(new Uint8Array(16).fill(0x42));
+  describe('getIvByteLength', () => {
+    it('should return 16 for CBC mode', () => {
+      expect(cipher.getIvByteLength()).toBe(16);
     });
   });
 
-  describe('generateIv', () => {
-    it('should generate a 16-byte IV', () => {
-      const randomBytes = vi
-        .fn()
-        .mockImplementation((size) => new Uint8Array(size).fill(0x42));
-      const cipher = new MockCbcCipher(randomBytes);
-      const iv = cipher.generateIv();
-      expect(iv).toBeInstanceOf(Uint8Array);
-      expect(iv.length).toBe(16);
-      expect(randomBytes).toHaveBeenCalledWith(16);
-      expect(iv.every((byte) => byte === 0x42)).toBe(true);
-    });
+  describe('getCekByteLength', () => {
+    it.each(keyConfigs)(
+      'should return correct CEK byte length for $enc',
+      ({ enc, cekLength }) => {
+        expect(cipher.getCekByteLength(enc)).toBe(cekLength);
+      },
+    );
   });
 });

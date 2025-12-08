@@ -1,13 +1,13 @@
 import { Cipher, DecryptParams, EncryptParams, EncryptResult } from '../Cipher';
 import { generateMacData } from './utils/generateMacData';
-import { isCbcEnc } from '@/constants/Enc';
+import { Enc, isCbcEnc } from '@/constants/Enc';
 import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
 import { divideCek } from './utils/divideCek';
-import { RandomBytes } from '@/common/types';
 import { timingSafeEqual } from './utils/timingSafeEqual';
 import { cbcVerifyCekLength } from './utils/cbcVerifyCekLength';
 import { cbcVerifyTagLength } from './utils/cbcVerifyTagLength';
 import { cbcVerifyIvLength } from './utils/cbcVerifyIvLength';
+import { cbcGetCekByteLength } from './utils/cbcGetCekByteLength';
 
 /**
  * Parameters required for the internal CBC encryption process.
@@ -50,22 +50,12 @@ export type GenerateTagParams = {
  * Implements the Cipher interface.
  */
 export abstract class AbstractCbcCipher implements Cipher {
-  /** The function used to generate random bytes. */
-  readonly randomBytes: RandomBytes;
-
-  /**
-   * Constructs an AbstractCbcCipher instance.
-   * @param randomBytes - The function used to generate random bytes.
-   */
-  constructor(randomBytes: RandomBytes) {
-    this.randomBytes = randomBytes;
-  }
-
   /**
    * Encrypts the given plaintext using the specified encryption algorithm.
    * @param enc - The encryption algorithm to use.
    * @param plaintext - The plaintext data to encrypt.
    * @param cek - The content encryption key.
+   * @param iv - The initialization vector.
    * @param aad - Additional authenticated data.
    * @returns A promise that resolves to the encryption result.
    * @throws Will throw an error if the encryption algorithm is invalid.
@@ -74,13 +64,15 @@ export abstract class AbstractCbcCipher implements Cipher {
     enc,
     plaintext,
     cek,
+    iv,
     aad,
   }: EncryptParams): Promise<EncryptResult> => {
     if (!isCbcEnc(enc)) {
       throw new Error(`Invalid encryption algorithm: ${enc}`);
     }
 
-    const iv = this.generateIv();
+    cbcVerifyIvLength(iv);
+
     const keyBitLength = parseKeyBitLength(enc);
     cbcVerifyCekLength(cek, keyBitLength);
     const { encRawKey, macRawKey } = divideCek({
@@ -101,7 +93,7 @@ export abstract class AbstractCbcCipher implements Cipher {
       keyBitLength,
     });
 
-    return { ciphertext, tag, iv };
+    return { ciphertext, tag };
   };
 
   /**
@@ -157,10 +149,19 @@ export abstract class AbstractCbcCipher implements Cipher {
   };
 
   /**
-   * Generates an initialization vector (IV) for the given encryption algorithm.
-   * @returns A Uint8Array representing the generated IV.
+   * Returns the byte length of the initialization vector (IV) for CBC encryption.
+   * For CBC mode, the IV is always 16 bytes.
+   * @returns The IV byte length as a number (always 16 for CBC).
    */
-  generateIv = () => this.randomBytes(16);
+  getIvByteLength = () => 16;
+
+  /**
+   * Returns the required byte length of the content encryption key (CEK) for the given CBC encryption algorithm.
+   * For CBC mode, the CEK is twice the key length since it's used for both encryption and MAC operations.
+   * @param enc - The encryption algorithm identifier.
+   * @returns The required CEK byte length for the specified CBC algorithm.
+   */
+  getCekByteLength = (enc: Enc) => cbcGetCekByteLength(enc);
 
   /**
    * Abstract method for the internal encryption process.
