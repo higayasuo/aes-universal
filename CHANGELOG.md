@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.14] - 2025-12-09
+
+### Changed
+
+- Reorganized code structure for better separation of concerns
+  - Moved type definitions from `src/constants/Enc.ts` to `src/types/Enc.ts`
+  - Moved type guard functions from `src/types/Enc.ts` to `src/common/utils/isEnc.ts`
+  - `src/constants/Enc.ts` now only contains constant arrays
+  - `src/types/Enc.ts` now only contains type definitions
+  - `src/common/utils/isEnc.ts` contains type guard functions (`isCbcEnc`, `isGcmEnc`, `isEnc`)
+  - Updated all import paths to reflect the new structure
+  - Added test file `src/common/utils/__tests__/isEnc.spec.ts` for type guard functions
+
 ## [0.1.13] - 2025-12-09
 
 ### Added

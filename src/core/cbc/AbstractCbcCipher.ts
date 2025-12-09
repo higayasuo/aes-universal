@@ -1,6 +1,7 @@
 import { Cipher, DecryptParams, EncryptParams, EncryptResult } from '../Cipher';
 import { generateMacData } from './utils/generateMacData';
-import { Enc, isCbcEnc } from '@/constants/Enc';
+import { Enc } from '@/types/Enc';
+import { isCbcEnc } from '@/common/utils/isEnc';
 import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
 import { divideCek } from './utils/divideCek';
 import { timingSafeEqual } from './utils/timingSafeEqual';

@@ -1,4 +1,5 @@
-import { isCbcEnc, isGcmEnc, Enc } from '@/constants/Enc';
+import { Enc } from '@/types/Enc';
+import { isCbcEnc, isGcmEnc } from '@/common/utils/isEnc';
 import { AbstractCbcCipher } from './cbc/AbstractCbcCipher';
 import { Cipher, DecryptParams, EncryptParams, EncryptResult } from './Cipher';
 import { AbstractGcmCipher } from './gcm/AbstractGcmCipher';

@@ -11,7 +11,7 @@ import {
   GcmEncryptInternalParams,
   GcmDecryptInternalParams,
 } from '../gcm/AbstractGcmCipher';
-import { Enc } from '@/constants/Enc';
+import { Enc } from '@/types/Enc';
 
 // Mock CBC implementation
 class MockCbcCipher extends AbstractCbcCipher {

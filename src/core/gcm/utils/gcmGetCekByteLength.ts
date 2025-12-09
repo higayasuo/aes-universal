@@ -1,5 +1,5 @@
 import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
-import { Enc } from '@/constants/Enc';
+import { Enc } from '@/types/Enc';
 
 /**
  * Returns the required byte length of the content encryption key (CEK) for GCM encryption.

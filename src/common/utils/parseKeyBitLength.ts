@@ -1,4 +1,4 @@
-import { Enc } from '../../constants/Enc';
+import { Enc } from '@/types/Enc';
 
 /**
  * Extracts the key length in bits from an encryption algorithm identifier.

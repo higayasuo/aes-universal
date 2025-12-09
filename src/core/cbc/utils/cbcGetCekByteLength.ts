@@ -1,4 +1,4 @@
-import { Enc } from '@/constants/Enc';
+import { Enc } from '@/types/Enc';
 import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
 
 /**

@@ -1,5 +1,6 @@
 import { Cipher, DecryptParams, EncryptParams, EncryptResult } from '../Cipher';
-import { Enc, isGcmEnc } from '@/constants/Enc';
+import { Enc } from '@/types/Enc';
+import { isGcmEnc } from '@/common/utils/isEnc';
 import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
 import { gcmVerifyCekLength } from './utils/gcmVerifyCekLength';
 import { gcmVerifyIvLength } from './utils/gcmVerifyIvLength';

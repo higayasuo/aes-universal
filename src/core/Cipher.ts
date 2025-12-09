@@ -1,4 +1,4 @@
-import { Enc } from '@/constants/Enc';
+import { Enc } from '@/types/Enc';
 
 /**
  * Parameters required for encryption operation.
