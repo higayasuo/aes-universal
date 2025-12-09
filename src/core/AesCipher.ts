@@ -1,70 +1,35 @@
 import { isCbcEnc, isGcmEnc, Enc } from '@/constants/Enc';
 import { AbstractCbcCipher } from './cbc/AbstractCbcCipher';
-import { createCbcCipher } from './cbc/createCbcCipher';
 import { Cipher, DecryptParams, EncryptParams, EncryptResult } from './Cipher';
 import { AbstractGcmCipher } from './gcm/AbstractGcmCipher';
-import { createGcmCipher } from './gcm/createGcmCipher';
-import { RandomBytes } from '@/common/types';
-import { parseKeyBitLength } from '@/common/utils/parseKeyBitLength';
 
 /**
  * Parameters required to construct an AesCipher instance.
- * @template CBC - The type of CBC cipher instance, must extend AbstractCbcCipher
- * @template CBCConstructor - The constructor type for the CBC cipher
- * @template GCM - The type of GCM cipher instance, must extend AbstractGcmCipher
- * @template GCMConstructor - The constructor type for the GCM cipher
- * @property {CBCConstructor} cbc - The constructor function for the CBC cipher
- * @property {GCMConstructor} gcm - The constructor function for the GCM cipher
- * @property {RandomBytes} randomBytes - The function used to generate random bytes
+ * @property {AbstractCbcCipher} cbc - The CBC cipher instance.
+ * @property {AbstractGcmCipher} gcm - The GCM cipher instance.
  */
-export type AesCipherConstructorParams<
-  CBC extends AbstractCbcCipher,
-  CBCConstructor extends new (...args: any[]) => CBC,
-  GCM extends AbstractGcmCipher,
-  GCMConstructor extends new (...args: any[]) => GCM,
-> = {
-  cbc: CBCConstructor;
-  gcm: GCMConstructor;
-  randomBytes: RandomBytes;
-};
+export interface AesCipherConstructorParams {
+  cbc: AbstractCbcCipher;
+  gcm: AbstractGcmCipher;
+}
 
 /**
  * A cipher implementation that supports both CBC and GCM modes of AES encryption.
- * @template CBC - The type of CBC cipher instance, must extend AbstractCbcCipher
- * @template CBCConstructor - The constructor type for the CBC cipher
- * @template GCM - The type of GCM cipher instance, must extend AbstractGcmCipher
- * @template GCMConstructor - The constructor type for the GCM cipher
+ * Implements the Cipher interface.
  */
-export class AesCipher<
-  CBC extends AbstractCbcCipher = AbstractCbcCipher,
-  CBCConstructor extends new (...args: any[]) => CBC = new (
-    ...args: any[]
-  ) => CBC,
-  GCM extends AbstractGcmCipher = AbstractGcmCipher,
-  GCMConstructor extends new (...args: any[]) => GCM = new (
-    ...args: any[]
-  ) => GCM,
-> implements Cipher
-{
+export class AesCipher implements Cipher {
   /** The CBC cipher instance */
-  private cbc: CBC;
+  private cbc: AbstractCbcCipher;
   /** The GCM cipher instance */
-  private gcm: GCM;
-  /** The function used to generate random bytes */
-  readonly randomBytes: RandomBytes;
+  private gcm: AbstractGcmCipher;
 
   /**
    * Constructs an AesCipher instance.
    * @param params - The parameters required to construct the cipher
    */
-  constructor({
-    cbc,
-    gcm,
-    randomBytes,
-  }: AesCipherConstructorParams<CBC, CBCConstructor, GCM, GCMConstructor>) {
-    this.cbc = createCbcCipher(cbc, randomBytes);
-    this.gcm = createGcmCipher(gcm, randomBytes);
-    this.randomBytes = randomBytes;
+  constructor({ cbc, gcm }: AesCipherConstructorParams) {
+    this.cbc = cbc;
+    this.gcm = gcm;
   }
 
   /**
@@ -106,17 +71,44 @@ export class AesCipher<
   };
 
   /**
-   * Generates a Content Encryption Key (CEK) for the specified encryption algorithm.
-   * For CBC mode, the CEK length is twice the key length since it's used for both
-   * encryption and MAC operations. For GCM mode, the CEK length matches the key length.
+   * Returns the required byte length of the initialization vector (IV)
+   * for the specified encryption algorithm.
+   * Delegates to CBC or GCM implementation depending on the mode.
    *
-   * @param enc - The encryption algorithm identifier
-   * @returns A Uint8Array containing the generated CEK
+   * @param enc - The encryption algorithm identifier.
+   * @returns The IV byte length required for the specified algorithm.
+   * @throws Will throw an error if the encryption mode is invalid.
    */
-  generateCek = (enc: Enc): Uint8Array => {
-    const keyBitLength = parseKeyBitLength(enc);
-    const keyByteLength = keyBitLength >> 3;
-    const cekByteLength = keyByteLength * (isCbcEnc(enc) ? 2 : 1);
-    return this.randomBytes(cekByteLength);
+  getIvByteLength = (enc: Enc) => {
+    if (isCbcEnc(enc)) {
+      return this.cbc.getIvByteLength(enc);
+    }
+
+    if (isGcmEnc(enc)) {
+      return this.gcm.getIvByteLength(enc);
+    }
+
+    throw new Error(`Invalid encryption mode: ${enc}`);
+  };
+
+  /**
+   * Returns the required byte length of the content encryption key (CEK)
+   * for the specified encryption algorithm.
+   * Delegates to CBC or GCM implementation depending on the mode.
+   *
+   * @param enc - The encryption algorithm identifier.
+   * @returns The CEK byte length required for the specified algorithm.
+   * @throws Will throw an error if the encryption mode is invalid.
+   */
+  getCekByteLength = (enc: Enc) => {
+    if (isCbcEnc(enc)) {
+      return this.cbc.getCekByteLength(enc);
+    }
+
+    if (isGcmEnc(enc)) {
+      return this.gcm.getCekByteLength(enc);
+    }
+
+    throw new Error(`Invalid encryption mode: ${enc}`);
   };
 }

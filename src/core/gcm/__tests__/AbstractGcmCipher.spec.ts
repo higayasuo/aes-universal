@@ -180,9 +180,12 @@ describe('AbstractGcmCipher', () => {
   });
 
   describe('getIvByteLength', () => {
-    it('should return 12 for GCM mode', () => {
-      expect(cipher.getIvByteLength()).toBe(12);
-    });
+    it.each(keyConfigs)(
+      'should return 12 for GCM mode with $enc',
+      ({ enc }) => {
+        expect(cipher.getIvByteLength(enc)).toBe(12);
+      },
+    );
   });
 
   describe('getCekByteLength', () => {

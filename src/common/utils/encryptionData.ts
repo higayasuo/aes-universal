@@ -36,7 +36,7 @@ export const encodeEncryptionData = ({
  * @returns {EncryptionData} The decoded data.
  */
 export const decodeEncryptionData = (encoded: Uint8Array): EncryptionData => {
-  const [ciphertext, iv, tag, aad] = decode(encoded.buffer);
+  const [ciphertext, iv, tag, aad] = decode(encoded.buffer as ArrayBuffer);
 
   return {
     ciphertext: new Uint8Array(ciphertext),

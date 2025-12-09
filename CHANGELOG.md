@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.11] - 2025-12-09
+
+### Added
+
+- Added `getCekByteLength` and `getIvByteLength` methods to `Cipher` interface
+  - These methods return the required byte lengths for Content Encryption Key (CEK) and Initialization Vector (IV) for each encryption algorithm
+  - Implemented in `AbstractCbcCipher` and `AbstractGcmCipher` classes
+  - Added utility functions `cbcGetCekByteLength` and `gcmGetCekByteLength` for calculating CEK lengths
+  - Updated `AesCipher` to delegate to the appropriate cipher instance based on encryption mode
+  - Updated README with documentation on using these methods to generate keys and IVs
+
+### Changed
+
+- Updated README documentation
+  - Changed "Key Lengths" section to "Required Lengths" to accurately reflect that it covers both keys and IVs
+  - Updated usage examples to demonstrate using `getCekByteLength` and `getIvByteLength` methods
+  - Clarified that users should generate keys and IVs themselves using these methods
+
+### Fixed
+
+- Fixed TypeScript type error in `decodeEncryptionData` function
+  - Added type assertion for `ArrayBufferLike` to `ArrayBuffer` to resolve compatibility issue with `cbor-js` decode function
+
 ## [0.1.10] - 2025-06-24
 
 ### Added

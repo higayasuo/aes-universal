@@ -149,11 +149,12 @@ export abstract class AbstractCbcCipher implements Cipher {
   };
 
   /**
-   * Returns the byte length of the initialization vector (IV) for CBC encryption.
-   * For CBC mode, the IV is always 16 bytes.
-   * @returns The IV byte length as a number (always 16 for CBC).
+   * Returns the byte length of the initialization vector (IV) required for CBC encryption.
+   * The IV length required for CBC mode (AES-CBC) is always 16 bytes (128 bits) per the JWE specification.
+   * @param enc - The encryption algorithm identifier (not used, included for interface compatibility).
+   * @returns The IV byte length required for CBC mode (always 16).
    */
-  getIvByteLength = () => 16;
+  getIvByteLength = (_enc: Enc) => 16;
 
   /**
    * Returns the required byte length of the content encryption key (CEK) for the given CBC encryption algorithm.

@@ -31,23 +31,17 @@ This package requires the following peer dependencies:
 
 ## Usage
 
-The library provides platform-specific implementations that automatically handle both CBC and GCM encryption modes. The `generateCek` method automatically generates the correct key length for each encryption mode. The `Cipher` interface includes a `randomBytes` property that provides access to the random bytes generation function used by the cipher.
+The library provides platform-specific implementations that automatically handle both CBC and GCM encryption modes. Use `getCekByteLength` and `getIvByteLength` methods to get the required byte lengths for each encryption mode, then generate the keys and IVs using a secure random bytes generator.
 
 ```typescript
-import { WebAesCipher } from 'aes-universal-web';
-import { NativeAesCipher } from 'aes-universal-native';
-import { webCryptoModule } from 'expo-crypto-universal-web';
-import { nativeCryptoModule } from 'expo-crypto-universal-native';
+import { webAesCipher } from 'aes-universal-web';
+import { nativeAesCipher } from 'aes-universal-native';
+import { randomBytes } from '@noble/hashes/utils';
 
 const isWeb = typeof crypto?.getRandomValues === 'function';
-const randomBytes = isWeb
-  ? webCryptoModule.getRandomBytes
-  : nativeCryptoModule.getRandomBytes;
 
 // Create cipher instance based on platform
-const cipher = isWeb
-  ? new WebAesCipher(randomBytes)
-  : new NativeAesCipher(randomBytes);
+const cipher = isWeb ? webAesCipher : nativeAesCipher;
 
 // Define plaintext
 const plaintext = new Uint8Array([1, 2, 3, 4]);
@@ -60,114 +54,91 @@ const cbcEnc = 'A128CBC-HS256';
 const gcmEnc = 'A128GCM';
 
 // Generate CEK for CBC mode
-const cek = cipher.generateCek(cbcEnc); // Automatically generates 32 bytes (16 for encryption + 16 for MAC)
+const cbcCek = randomBytes(cipher.getCekByteLength(cbcEnc)); // generates 32 bytes (16 for encryption + 16 for MAC)
+// Generate IV for CBC mode
+const cbcIv = randomBytes(cipher.getIvByteLength(cbcEnc)); // generates 16 bytes
 
 // Encrypt data using CBC mode
-const { ciphertext, tag, iv } = await cipher.encrypt({
+const { ciphertext, tag } = await cipher.encrypt({
   enc: cbcEnc,
-  cek,
+  cek: cbcCek,
   plaintext,
+  iv: cbcIv,
   aad,
 });
 
 // Decrypt data
 const decrypted = await cipher.decrypt({
   enc: cbcEnc,
-  cek,
+  cek: cbcCek,
   ciphertext,
   tag,
-  iv,
+  iv: cbcIv,
   aad,
 });
 
 expect(decrypted).toEqual(plaintext);
 
 // The same cipher instance can be used for GCM mode
-const gcmCek = cipher.generateCek(gcmEnc); // Automatically generates 16 bytes
+// Generate CEK for GCM mode
+const gcmCek = randomBytes(cipher.getCekByteLength(gcmEnc)); // generates 16 bytes
+// Generate IV for GCM mode
+const gcmIv = randomBytes(cipher.getIvByteLength(gcmEnc)); // generates 12 bytes
 
+// Encrypt data using GCM mode
 const gcmResult = await cipher.encrypt({
   enc: gcmEnc,
   cek: gcmCek,
   plaintext,
+  iv: gcmIv,
   aad,
 });
 
+// Decrypt data
 const gcmDecrypted = await cipher.decrypt({
   enc: gcmEnc,
   cek: gcmCek,
   ciphertext: gcmResult.ciphertext,
   tag: gcmResult.tag,
-  iv: gcmResult.iv,
+  iv: gcmIv,
   aad,
 });
 
 expect(gcmDecrypted).toEqual(plaintext);
 ```
 
-## Key Lengths
+## Required Lengths
 
-The library automatically handles key lengths for different encryption modes:
+The library provides `getCekByteLength` and `getIvByteLength` methods to get the required byte lengths for each encryption mode. Use these methods with a secure random bytes generator to create keys and IVs.
 
 ### CBC Mode
+
+**Content Encryption Key (CEK) lengths:**
 
 - A128CBC-HS256: 32 bytes (16 for encryption + 16 for MAC)
 - A192CBC-HS384: 48 bytes (24 for encryption + 24 for MAC)
 - A256CBC-HS512: 64 bytes (32 for encryption + 32 for MAC)
 
+**Initialization Vector (IV) length:**
+
+- All CBC modes: 16 bytes
+
 ### GCM Mode
+
+**Content Encryption Key (CEK) lengths:**
 
 - A128GCM: 16 bytes
 - A192GCM: 24 bytes
 - A256GCM: 32 bytes
 
-## Error Messages
+**Initialization Vector (IV) length:**
 
-The library provides detailed error messages to help with debugging:
-
-### CBC Mode
-
-- Content Encryption Key (CEK) length errors:
-
-  ```
-  Invalid CBC content encryption key length: expected {expectedLength} bytes ({keyBits} bits), but got {actualLength} bytes
-  ```
-
-- Initialization Vector (IV) length errors:
-
-  ```
-  Invalid CBC IV length: expected 16 bytes, got {actualLength} bytes
-  ```
-
-- Authentication Tag length errors:
-  ```
-  Invalid CBC authentication tag length: expected {expectedLength} bytes ({keyBits} bits), but got {actualLength} bytes
-  ```
-
-### GCM Mode
-
-- Content Encryption Key (CEK) length errors:
-
-  ```
-  Invalid GCM content encryption key length: expected {expectedLength} bytes ({keyBits} bits), but got {actualLength} bytes
-  ```
-
-- Initialization Vector (IV) length errors:
-
-  ```
-  Invalid GCM IV length: expected 12 bytes, got {actualLength} bytes
-  ```
-
-- Authentication Tag length errors:
-  ```
-  Invalid GCM authentication tag length: expected 16 bytes, but got {actualLength} bytes
-  ```
+- All GCM modes: 12 bytes
 
 ## Platform Support
 
 - Web: Uses Web Crypto API
 - Native: Uses forge library
-
-The library automatically selects the appropriate implementation based on the platform.
 
 ## License
 

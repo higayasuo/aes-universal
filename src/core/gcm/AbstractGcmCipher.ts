@@ -157,11 +157,12 @@ export abstract class AbstractGcmCipher implements Cipher {
   };
 
   /**
-   * Returns the byte length of the initialization vector (IV) for GCM encryption.
-   * For GCM mode, the IV is always 12 bytes.
-   * @returns The IV byte length as a number (always 12 for GCM).
+   * Returns the required byte length of the initialization vector (IV) for the specified GCM encryption algorithm.
+   * Per the JWE specification, the IV for AES-GCM must always be 12 bytes (96 bits).
+   * @param _enc - The encryption algorithm identifier (not used, included for interface compatibility).
+   * @returns The IV byte length required for GCM mode (always 12).
    */
-  getIvByteLength = () => 12;
+  getIvByteLength = (_enc: Enc) => 12;
 
   /**
    * Returns the required byte length of the content encryption key (CEK) for the given GCM encryption algorithm.

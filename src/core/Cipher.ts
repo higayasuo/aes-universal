@@ -1,4 +1,3 @@
-import { RandomBytes } from '@/common/types';
 import { Enc } from '@/constants/Enc';
 
 /**
@@ -6,26 +5,26 @@ import { Enc } from '@/constants/Enc';
  * @property {Enc} enc - The encryption algorithm to use.
  * @property {Uint8Array} plaintext - The data to be encrypted.
  * @property {Uint8Array} cek - The content encryption key.
+ * @property {Uint8Array} iv - The initialization vector.
  * @property {Uint8Array} aad - Additional authenticated data.
  */
-export type EncryptParams = {
+export interface EncryptParams {
   enc: Enc;
   plaintext: Uint8Array;
   cek: Uint8Array;
+  iv: Uint8Array;
   aad: Uint8Array;
-};
+}
 
 /**
  * Result of an encryption operation.
  * @property {Uint8Array} ciphertext - The encrypted data.
  * @property {Uint8Array} tag - The authentication tag.
- * @property {Uint8Array} iv - The initialization vector.
  */
-export type EncryptResult = {
+export interface EncryptResult {
   ciphertext: Uint8Array;
   tag: Uint8Array;
-  iv: Uint8Array;
-};
+}
 
 /**
  * Parameters required for decryption operation.
@@ -36,35 +35,58 @@ export type EncryptResult = {
  * @property {Uint8Array} tag - The authentication tag.
  * @property {Uint8Array} aad - Additional authenticated data.
  */
-export type DecryptParams = {
+export interface DecryptParams {
   enc: string;
   cek: Uint8Array;
   ciphertext: Uint8Array;
   iv: Uint8Array;
   tag: Uint8Array;
   aad: Uint8Array;
-};
+}
 
 /**
  * Interface for cryptographic cipher operations.
  */
 export interface Cipher {
   /**
-   * Function to generate random bytes.
-   * @type {RandomBytes}
-   */
-  randomBytes: RandomBytes;
-  /**
    * Encrypts data using the specified algorithm and parameters.
-   * @param {EncryptParams} args - The encryption parameters.
-   * @returns {Promise<EncryptResult>} A promise that resolves to the encryption result.
+   * @param params - The encryption parameters.
+   * @returns A promise that resolves to the encryption result.
    */
-  encrypt: (params: EncryptParams) => Promise<EncryptResult>;
+  encrypt: ({
+    enc,
+    plaintext,
+    cek,
+    iv,
+    aad,
+  }: EncryptParams) => Promise<EncryptResult>;
 
   /**
    * Decrypts data using the specified algorithm and parameters.
-   * @param {DecryptParams} args - The decryption parameters.
-   * @returns {Promise<Uint8Array>} A promise that resolves to the decrypted data.
+   * @param params - The decryption parameters.
+   * @returns A promise that resolves to the decrypted data.
    */
-  decrypt: (params: DecryptParams) => Promise<Uint8Array>;
+  decrypt: ({
+    enc,
+    cek,
+    ciphertext,
+    iv,
+    tag,
+    aad,
+  }: DecryptParams) => Promise<Uint8Array>;
+
+  /**
+   * Returns the byte length of the initialization vector (IV) required for the specified encryption algorithm.
+   * @param enc - The encryption algorithm identifier.
+   * @returns The IV byte length for the specified algorithm.
+   */
+  getIvByteLength: (enc: Enc) => number;
+
+  /**
+   * Returns the required byte length of the content encryption key (CEK) for the given encryption algorithm.
+   * This value depends on the selected algorithm—for CBC modes, the CEK is typically twice the underlying key size due to combined encryption/MAC.
+   * @param enc - The encryption algorithm identifier.
+   * @returns The required CEK byte length for the specified algorithm.
+   */
+  getCekByteLength: (enc: Enc) => number;
 }

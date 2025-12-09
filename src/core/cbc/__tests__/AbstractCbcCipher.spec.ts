@@ -193,9 +193,12 @@ describe('AbstractCbcCipher', () => {
   });
 
   describe('getIvByteLength', () => {
-    it('should return 16 for CBC mode', () => {
-      expect(cipher.getIvByteLength()).toBe(16);
-    });
+    it.each(keyConfigs)(
+      'should return 16 for CBC mode with $enc',
+      ({ enc }) => {
+        expect(cipher.getIvByteLength(enc)).toBe(16);
+      },
+    );
   });
 
   describe('getCekByteLength', () => {
