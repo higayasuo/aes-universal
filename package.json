@@ -24,8 +24,7 @@
     "test": "vitest --run",
     "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm test && npm run build",
-    "release": "npm publish --safe-chain-skip-minimum-package-age"
+    "prepublishOnly": "npm test && npm run build"
   },
   "keywords": [
     "expo",
