@@ -1,6 +1,6 @@
 {
   "name": "aes-universal",
-  "version": "0.1.11",
+  "version": "0.1.13",
   "description": "Universal AES encryption/decryption library that works on both web and native platforms",
   "private": false,
   "type": "module",
@@ -24,7 +24,8 @@
     "test": "vitest --run",
     "coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm test && npm run build"
+    "prepublishOnly": "npm test && npm run build",
+    "publish": "npm publish --safe-chain-skip-minimum-package-age"
   },
   "keywords": [
     "expo",
